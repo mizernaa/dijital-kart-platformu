@@ -1,0 +1,258 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  SUPER_ADMIN
+  SUPPORT
+  CUSTOMER
+}
+
+enum UserStatus {
+  ACTIVE
+  PASSIVE
+  SUSPENDED
+  TRIAL
+}
+
+enum PackageName {
+  FREE
+  STARTER
+  PRO
+  ENTERPRISE
+}
+
+enum ContactType {
+  PHONE
+  EMAIL
+  WHATSAPP
+  TELEGRAM
+  WEBSITE
+  CUSTOM
+}
+
+enum SocialPlatform {
+  INSTAGRAM
+  LINKEDIN
+  TWITTER
+  YOUTUBE
+  TIKTOK
+  FACEBOOK
+  GITHUB
+  BEHANCE
+  DRIBBBLE
+  SPOTIFY
+  SOUNDCLOUD
+  CUSTOM
+}
+
+enum QRFormat {
+  PNG
+  SVG
+  PDF
+}
+
+enum EventType {
+  PAGE_VIEW
+  BUTTON_CLICK
+  QR_SCAN
+  NFC_SCAN
+  VCARD_DOWNLOAD
+  CONTACT_FORM
+}
+
+enum ButtonStyle {
+  ROUNDED
+  SQUARE
+  PILL
+}
+
+enum ProfileShape {
+  CIRCLE
+  SQUARE
+  HEXAGON
+}
+
+enum NfcOrderStatus {
+  PENDING
+  PRODUCTION
+  SHIPPED
+  DELIVERED
+  CANCELLED
+}
+
+model Package {
+  id                     String      @id @default(cuid())
+  name                   PackageName @unique
+  displayName            String
+  maxPages               Int         @default(1)
+  analyticsRetentionDays Int         @default(7)
+  hasCustomDomain        Boolean     @default(false)
+  hasNfc                 Boolean     @default(false)
+  maxThemes              Int         @default(3)
+  maxTeamMembers         Int         @default(1)
+  users                  User[]
+  createdAt              DateTime    @default(now())
+  updatedAt              DateTime    @updatedAt
+}
+
+model User {
+  id              String        @id @default(cuid())
+  username        String        @unique
+  email           String        @unique
+  passwordHash    String
+  role            UserRole      @default(CUSTOMER)
+  status          UserStatus    @default(TRIAL)
+  passwordChanged Boolean       @default(false)
+  phone           String?
+  company         String?
+  notes           String?
+  lastLoginAt     DateTime?
+  packageId       String
+  package         Package       @relation(fields: [packageId], references: [id])
+  profile         Profile?
+  refreshTokens   RefreshToken[]
+  nfcOrders       NfcOrder[]
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  @@index([email])
+  @@index([username])
+}
+
+model RefreshToken {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}
+
+model Profile {
+  id           String       @id @default(cuid())
+  userId       String       @unique
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  slug         String       @unique
+  displayName  String
+  title        String?
+  bio          String?
+  avatarUrl    String?
+  theme        String       @default("minimal")
+  bgColor      String       @default("#ffffff")
+  fontFamily   String       @default("Inter")
+  buttonStyle  ButtonStyle  @default(ROUNDED)
+  profileShape ProfileShape @default(CIRCLE)
+  isPublished  Boolean      @default(false)
+  // Şirket bölümü
+  companyName        String?
+  companyLogoUrl     String?
+  companyDescription String?
+  companyWebsite     String?
+  companyIndustry    String?
+  showCompanySection Boolean @default(false)
+  // CV / Hakkımda bölümü
+  cvSkills           String? // JSON array: ["React","Node.js"]
+  cvLanguages        String? // JSON array: ["Türkçe","İngilizce"]
+  showCvSection      Boolean @default(false)
+  contacts     ContactItem[]
+  socials      SocialLink[]
+  qrCode       QRCode?
+  analytics    AnalyticsEvent[]
+  leads        LeadCapture[]
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  @@index([slug])
+}
+
+model ContactItem {
+  id        String      @id @default(cuid())
+  profileId String
+  profile   Profile     @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  type      ContactType
+  value     String
+  label     String?
+  order     Int         @default(0)
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+
+  @@index([profileId])
+}
+
+model SocialLink {
+  id        String         @id @default(cuid())
+  profileId String
+  profile   Profile        @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  platform  SocialPlatform
+  url       String
+  order     Int            @default(0)
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+
+  @@index([profileId])
+}
+
+model QRCode {
+  id              String   @id @default(cuid())
+  profileId       String   @unique
+  profile         Profile  @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  foregroundColor String   @default("#000000")
+  backgroundColor String   @default("#ffffff")
+  logoUrl         String?
+  format          QRFormat @default(PNG)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model AnalyticsEvent {
+  id          String    @id @default(cuid())
+  profileId   String
+  profile     Profile   @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  eventType   EventType
+  source      String?
+  buttonLabel String?
+  ipHash      String?
+  city        String?
+  country     String?
+  device      String?
+  browser     String?
+  createdAt   DateTime  @default(now())
+
+  @@index([profileId, createdAt])
+  @@index([profileId, eventType])
+}
+
+model LeadCapture {
+  id        String   @id @default(cuid())
+  profileId String
+  profile   Profile  @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  name      String
+  email     String?
+  message   String
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([profileId, createdAt])
+}
+
+model NfcOrder {
+  id             String         @id @default(cuid())
+  userId         String
+  user           User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  status         NfcOrderStatus @default(PENDING)
+  trackingNumber String?
+  address        String
+  notes          String?
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+
+  @@index([userId])
+}
