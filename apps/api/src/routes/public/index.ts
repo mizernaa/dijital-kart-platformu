@@ -9,6 +9,24 @@ import { ProfileDetail } from '@dkp/types'
 
 export const publicRouter = Router()
 
+// GET /p/domain/:domain — custom domain lookup (auth yok)
+publicRouter.get('/domain/:domain', async (req, res, next) => {
+  try {
+    const profile = await prisma.profile.findFirst({
+      where: {
+        customDomain: req.params.domain,
+        customDomainVerified: true,
+        isPublished: true,
+      },
+      select: { slug: true },
+    })
+    if (!profile) throw new AppError(404, 'Domain bulunamadı.')
+    res.json({ success: true, data: { slug: profile.slug } })
+  } catch (err) {
+    next(err)
+  }
+})
+
 // GET /p/:slug — public profil verisi
 publicRouter.get('/:slug', async (req, res, next) => {
   try {

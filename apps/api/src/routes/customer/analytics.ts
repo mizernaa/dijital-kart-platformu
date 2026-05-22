@@ -1,13 +1,14 @@
 import { Router } from 'express'
 import { prisma } from '@dkp/database'
 import { AppError } from '../../middleware/errorHandler'
+import { generateAnalyticsPDF } from '../../utils/pdf'
 
 export const analyticsRouter = Router()
 
 // GET /customer/analytics?days=30
 analyticsRouter.get('/', async (req, res, next) => {
   try {
-    const days = Math.min(365, parseInt(req.query.days as string) || 30)
+    const days = parseInt(req.query.days as string) || 30
     const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000)
 
     const profile = await prisma.profile.findUnique({ where: { userId: req.user!.userId } })
@@ -154,10 +155,66 @@ analyticsRouter.get('/', async (req, res, next) => {
   }
 })
 
+// GET /customer/analytics/export-pdf
+analyticsRouter.get('/export-pdf', async (req, res, next) => {
+  try {
+    const days = parseInt(req.query.days as string) || 30
+    const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000)
+
+    const profile = await prisma.profile.findUnique({ where: { userId: req.user!.userId } })
+    if (!profile) throw new AppError(404, 'Profil bulunamadı.')
+
+    const [totalViews, uniqueResult, vcardDownloads, leadCount, dailyRows, buttonEvents, deviceEvents] =
+      await Promise.all([
+        prisma.analyticsEvent.count({ where: { profileId: profile.id, eventType: 'PAGE_VIEW', createdAt: { gte: since } } }),
+        prisma.analyticsEvent.findMany({ where: { profileId: profile.id, eventType: 'PAGE_VIEW', createdAt: { gte: since } }, select: { ipHash: true }, distinct: ['ipHash'] }),
+        prisma.analyticsEvent.count({ where: { profileId: profile.id, eventType: 'VCARD_DOWNLOAD', createdAt: { gte: since } } }),
+        prisma.leadCapture.count({ where: { profileId: profile.id } }),
+        prisma.$queryRaw<{ date: string; count: bigint }[]>`
+          SELECT DATE("createdAt")::text as date, COUNT(*) as count
+          FROM "AnalyticsEvent"
+          WHERE "profileId" = ${profile.id} AND "eventType" = 'PAGE_VIEW'::"EventType" AND "createdAt" >= ${since}
+          GROUP BY DATE("createdAt") ORDER BY date ASC`,
+        prisma.analyticsEvent.groupBy({ by: ['buttonLabel'], where: { profileId: profile.id, eventType: 'BUTTON_CLICK', createdAt: { gte: since }, buttonLabel: { not: null } }, _count: { buttonLabel: true }, orderBy: { _count: { buttonLabel: 'desc' } }, take: 8 }),
+        prisma.analyticsEvent.groupBy({ by: ['device'], where: { profileId: profile.id, eventType: 'PAGE_VIEW', createdAt: { gte: since } }, _count: { device: true } }),
+      ])
+
+    const deviceBreakdown = { desktop: 0, mobile: 0, tablet: 0, other: 0 }
+    for (const row of deviceEvents) {
+      const d = (row.device || 'desktop').toLowerCase()
+      if (d === 'mobile') deviceBreakdown.mobile += row._count.device
+      else if (d === 'tablet') deviceBreakdown.tablet += row._count.device
+      else if (d === 'desktop') deviceBreakdown.desktop += row._count.device
+      else deviceBreakdown.other += row._count.device
+    }
+
+    const buffer = await generateAnalyticsPDF({
+      displayName: profile.displayName,
+      days,
+      totalViews,
+      uniqueVisitors: uniqueResult.filter(r => r.ipHash).length,
+      vcardDownloads,
+      leadCount,
+      dailyViews: dailyRows.map(r => ({ date: r.date, count: Number(r.count) })),
+      topButtons: buttonEvents.map(e => ({ label: e.buttonLabel!, count: e._count.buttonLabel })),
+      deviceBreakdown,
+    })
+
+    res.set({
+      'Content-Type': 'application/pdf',
+      'Content-Disposition': `attachment; filename="rapor-${days}g.pdf"`,
+      'Content-Length': String(buffer.length),
+    })
+    res.send(buffer)
+  } catch (err) {
+    next(err)
+  }
+})
+
 // GET /customer/analytics/export — CSV
 analyticsRouter.get('/export', async (req, res, next) => {
   try {
-    const days = Math.min(365, parseInt(req.query.days as string) || 30)
+    const days = parseInt(req.query.days as string) || 30
     const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000)
 
     const profile = await prisma.profile.findUnique({ where: { userId: req.user!.userId } })

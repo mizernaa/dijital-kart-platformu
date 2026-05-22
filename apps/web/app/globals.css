@@ -8,41 +8,64 @@
   }
 
   body {
-    @apply bg-gray-50 text-gray-900 antialiased;
+    background-color: #F5F0E8;
+    @apply text-[#2C2418] antialiased;
   }
 }
 
 @layer components {
+  /* ── Buttons ──────────────────────────────────── */
   .btn-primary {
-    @apply bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed;
+    @apply bg-[#C45E2A] text-white px-4 py-2 rounded-xl hover:bg-[#A84E22]
+           transition-all duration-150 font-semibold text-sm
+           shadow-[0_1px_3px_rgba(196,94,42,0.3)]
+           hover:shadow-[0_2px_8px_rgba(196,94,42,0.4)]
+           active:scale-95
+           disabled:opacity-50 disabled:cursor-not-allowed;
   }
 
   .btn-secondary {
-    @apply bg-white text-gray-700 px-4 py-2 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors font-medium;
+    @apply bg-white text-[#2C2418] px-4 py-2 rounded-xl
+           border border-[#E8E0D0]
+           hover:bg-[#F5F0E8]
+           transition-all duration-150 font-semibold text-sm
+           shadow-[0_1px_2px_rgba(44,36,24,0.06)]
+           disabled:opacity-50 disabled:cursor-not-allowed;
   }
 
   .btn-danger {
-    @apply bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors font-medium;
+    @apply bg-red-600 text-white px-4 py-2 rounded-xl hover:bg-red-700
+           transition-all duration-150 font-semibold text-sm
+           disabled:opacity-50 disabled:cursor-not-allowed;
   }
 
+  /* ── Cards ────────────────────────────────────── */
   .card {
-    @apply bg-white rounded-xl border border-gray-200 shadow-sm;
+    background-color: #FFFFFF;
+    @apply rounded-2xl border border-[#E8E0D0]
+           shadow-[0_2px_8px_rgba(44,36,24,0.07),inset_0_1px_0_rgba(255,255,255,0.7)];
   }
 
+  /* ── Inputs ───────────────────────────────────── */
   .input {
-    @apply w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent;
+    @apply w-full border border-[#E8E0D0] rounded-xl px-3 py-2 text-sm
+           bg-white text-[#2C2418]
+           placeholder:text-[#8C7B6B]
+           focus:outline-none focus:ring-2 focus:ring-[#C45E2A]/25 focus:border-[#C45E2A]
+           transition-all;
   }
 
   .label {
-    @apply block text-sm font-medium text-gray-700 mb-1;
+    @apply block text-sm font-medium text-[#5A4A3A] mb-1;
   }
 
+  /* ── Status badges ────────────────────────────── */
   .badge-active {
     @apply inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800;
   }
 
   .badge-passive {
-    @apply inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600;
+    @apply inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-[#F5F0E8] text-[#8C7B6B];
   }
 
   .badge-suspended {
@@ -50,6 +73,6 @@
   }
 
   .badge-trial {
-    @apply inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800;
+    @apply inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-[#fde8d4] text-[#A84E22];
   }
 }

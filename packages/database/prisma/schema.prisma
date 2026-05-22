@@ -86,6 +86,12 @@ enum NfcOrderStatus {
   CANCELLED
 }
 
+enum TeamRole {
+  ADMIN
+  EDITOR
+  VIEWER
+}
+
 model Package {
   id                     String      @id @default(cuid())
   name                   PackageName @unique
@@ -115,11 +121,14 @@ model User {
   lastLoginAt     DateTime?
   packageId       String
   package         Package       @relation(fields: [packageId], references: [id])
-  profile         Profile?
-  refreshTokens   RefreshToken[]
-  nfcOrders       NfcOrder[]
-  createdAt       DateTime      @default(now())
-  updatedAt       DateTime      @updatedAt
+  profile           Profile?
+  refreshTokens     RefreshToken[]
+  nfcOrders         NfcOrder[]
+  teamMembersOwned  TeamMember[]     @relation("TeamOwner")
+  teamMemberOf      TeamMember[]     @relation("TeamMember")
+  teamInvitations   TeamInvitation[] @relation("TeamInvitations")
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
 
   @@index([email])
   @@index([username])
@@ -150,7 +159,10 @@ model Profile {
   fontFamily   String       @default("Inter")
   buttonStyle  ButtonStyle  @default(ROUNDED)
   profileShape ProfileShape @default(CIRCLE)
-  isPublished  Boolean      @default(false)
+  isPublished          Boolean  @default(false)
+  customDomain         String?  @unique
+  customDomainVerified Boolean  @default(false)
+  customDomainToken    String?  @unique
   // Şirket bölümü
   companyName        String?
   companyLogoUrl     String?
@@ -255,4 +267,30 @@ model NfcOrder {
   updatedAt      DateTime       @updatedAt
 
   @@index([userId])
+}
+
+model TeamMember {
+  id        String   @id @default(cuid())
+  ownerId   String
+  memberId  String
+  role      TeamRole @default(VIEWER)
+  createdAt DateTime @default(now())
+  owner     User     @relation("TeamOwner",  fields: [ownerId],  references: [id], onDelete: Cascade)
+  member    User     @relation("TeamMember", fields: [memberId], references: [id], onDelete: Cascade)
+
+  @@unique([ownerId, memberId])
+  @@index([ownerId])
+}
+
+model TeamInvitation {
+  id        String   @id @default(cuid())
+  ownerId   String
+  email     String
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  owner     User     @relation("TeamInvitations", fields: [ownerId], references: [id], onDelete: Cascade)
+
+  @@index([ownerId])
+  @@index([token])
 }

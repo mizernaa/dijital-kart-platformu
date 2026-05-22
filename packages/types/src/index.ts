@@ -26,6 +26,7 @@ export type EventType =
   | 'CONTACT_FORM'
 export type ButtonStyle = 'ROUNDED' | 'SQUARE' | 'PILL'
 export type ProfileShape = 'CIRCLE' | 'SQUARE' | 'HEXAGON'
+export type TeamRole = 'ADMIN' | 'EDITOR' | 'VIEWER'
 
 // API Response wrapper
 export interface ApiResponse<T = undefined> {
@@ -191,4 +192,46 @@ export interface TrackEventRequest {
   eventType: EventType
   source?: string
   buttonLabel?: string
+}
+
+// Team
+export interface TeamMemberUser {
+  id: string
+  ownerId: string
+  memberId: string
+  role: TeamRole
+  createdAt: string
+  member: {
+    username: string
+    email: string
+    profile: { displayName: string; avatarUrl: string | null } | null
+  }
+}
+
+export interface TeamInvitation {
+  id: string
+  email: string
+  token: string
+  expiresAt: string
+  createdAt: string
+}
+
+export interface InviteMemberRequest {
+  email: string
+  role: TeamRole
+}
+
+export interface TeamListResponse {
+  members: TeamMemberUser[]
+  invitations: TeamInvitation[]
+  memberCount: number
+  maxTeamMembers: number
+}
+
+// Custom Domain
+export interface CustomDomainStatus {
+  domain: string | null
+  verified: boolean
+  token: string | null
+  cnameTarget: string
 }

@@ -9,12 +9,24 @@ const config: Config = {
     extend: {
       colors: {
         primary: {
-          50: '#eff6ff',
-          100: '#dbeafe',
-          500: '#3b82f6',
-          600: '#2563eb',
-          700: '#1d4ed8',
-          900: '#1e3a8a',
+          50:  '#fef3ec',
+          100: '#fde8d4',
+          200: '#fbd1aa',
+          300: '#f8b47a',
+          400: '#f49050',
+          500: '#C45E2A',
+          600: '#A84E22',
+          700: '#8B3F1A',
+          800: '#6e3215',
+          900: '#552611',
+        },
+        clay: {
+          canvas:   '#F5F0E8',
+          surface:  '#FEFCF9',
+          card:     '#FFFFFF',
+          border:   '#E8E0D0',
+          text:     '#2C2418',
+          muted:    '#8C7B6B',
         },
       },
       animation: {

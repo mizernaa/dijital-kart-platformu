@@ -47,6 +47,17 @@ export default function AnalyticsPage() {
     })
   }
 
+  const downloadPdf = () => {
+    api.get(`/customer/analytics/export-pdf?days=${days}`, { responseType: 'blob' }).then(res => {
+      const url = URL.createObjectURL(new Blob([res.data], { type: 'application/pdf' }))
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `rapor-${days}g.pdf`
+      a.click()
+      URL.revokeObjectURL(url)
+    })
+  }
+
   if (loading) return <div className="text-center py-20 text-gray-400">Yükleniyor...</div>
 
   const devicePieData = data ? [
@@ -80,6 +91,10 @@ export default function AnalyticsPage() {
           <button onClick={downloadCsv} className="btn-secondary flex items-center gap-1.5 text-sm">
             <Download size={15} />
             CSV
+          </button>
+          <button onClick={downloadPdf} className="btn-primary flex items-center gap-1.5 text-sm">
+            <Download size={15} />
+            PDF
           </button>
         </div>
       </div>

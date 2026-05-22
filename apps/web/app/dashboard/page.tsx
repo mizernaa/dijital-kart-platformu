@@ -84,15 +84,15 @@ export default function DashboardPage() {
 
       {/* ── Hero Header ─────────────────────────────────────────── */}
       <div className="relative rounded-2xl overflow-hidden"
-        style={{ background: 'linear-gradient(135deg, #1e40af 0%, #4f46e5 45%, #7c3aed 100%)' }}>
+        style={{ background: 'linear-gradient(135deg, #2C2418 0%, #7B3A18 45%, #C45E2A 100%)' }}>
         {/* Dot grid overlay */}
         <div className="absolute inset-0 opacity-10 pointer-events-none"
           style={{ backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.9) 1px, transparent 1px)', backgroundSize: '22px 22px' }} />
         {/* Glow */}
         <div className="absolute top-0 right-0 w-96 h-96 rounded-full pointer-events-none"
-          style={{ background: 'radial-gradient(circle, rgba(167,139,250,0.4), transparent 70%)', transform: 'translate(30%,-40%)' }} />
+          style={{ background: 'radial-gradient(circle, rgba(232,132,58,0.45), transparent 70%)', transform: 'translate(30%,-40%)' }} />
         <div className="absolute bottom-0 left-0 w-64 h-64 rounded-full pointer-events-none"
-          style={{ background: 'radial-gradient(circle, rgba(96,165,250,0.3), transparent 70%)', transform: 'translate(-30%,40%)' }} />
+          style={{ background: 'radial-gradient(circle, rgba(196,94,42,0.3), transparent 70%)', transform: 'translate(-30%,40%)' }} />
 
         <div className="relative z-10 p-6">
           {/* Top row */}

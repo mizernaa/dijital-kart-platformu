@@ -4,7 +4,7 @@ import { usePathname, useRouter } from 'next/navigation'
 import {
   Users, Package, LayoutDashboard, UserCircle,
   QrCode, BarChart2, LogOut, Settings, CreditCard,
-  MessageSquare, Wifi, TrendingUp,
+  MessageSquare, Wifi, TrendingUp, Globe,
 } from 'lucide-react'
 import { clearAuth, getAuthUser } from '@/lib/auth'
 import { api } from '@/lib/api'
@@ -49,6 +49,8 @@ export function Sidebar() {
     { href: '/dashboard/analytics', label: 'Analitik', icon: <BarChart2 size={18} /> },
     { href: '/dashboard/leads', label: 'Mesajlar', icon: <MessageSquare size={18} />, badge: unreadLeads },
     { href: '/dashboard/nfc', label: 'NFC Sipariş', icon: <Wifi size={18} /> },
+    { href: '/dashboard/custom-domain', label: 'Özel Domain', icon: <Globe size={18} /> },
+    { href: '/dashboard/team', label: 'Ekip', icon: <Users size={18} /> },
   ]
 
   const navItems = isAdmin ? adminNav : customerNav
@@ -63,13 +65,13 @@ export function Sidebar() {
   }
 
   return (
-    <aside className="fixed inset-y-0 left-0 w-60 bg-white border-r border-gray-200 flex flex-col z-10">
-      <div className="p-5 border-b border-gray-100">
+    <aside className="fixed inset-y-0 left-0 w-60 bg-[#FEFCF9] border-r border-[#E8E0D0] flex flex-col z-10">
+      <div className="p-5 border-b border-[#E8E0D0]">
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-violet-600 rounded-lg flex items-center justify-center">
+          <div className="w-8 h-8 bg-gradient-to-br from-[#C45E2A] to-[#E8843A] rounded-lg flex items-center justify-center shadow-sm">
             <span className="text-white font-black text-sm">Q</span>
           </div>
-          <span className="font-bold bg-gradient-to-r from-blue-600 to-violet-600 bg-clip-text text-transparent text-sm">Q-Kart</span>
+          <span className="font-bold bg-gradient-to-r from-[#C45E2A] to-[#E8843A] bg-clip-text text-transparent text-sm">Q-Kart</span>
         </div>
       </div>
 
@@ -79,10 +81,10 @@ export function Sidebar() {
             key={item.href}
             href={item.href}
             className={clsx(
-              'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors',
+              'flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all',
               pathname === item.href || pathname.startsWith(item.href + '/')
-                ? 'bg-blue-50 text-blue-700'
-                : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                ? 'bg-[#F5E6D8] text-[#C45E2A] shadow-[inset_0_1px_2px_rgba(196,94,42,0.08)]'
+                : 'text-[#5A4A3A] hover:bg-[#F5F0E8] hover:text-[#2C2418]'
             )}
           >
             {item.icon}
@@ -96,16 +98,16 @@ export function Sidebar() {
         ))}
       </nav>
 
-      <div className="p-3 border-t border-gray-100">
-        <div className="px-3 py-2 text-xs text-gray-500 font-medium truncate">
+      <div className="p-3 border-t border-[#E8E0D0]">
+        <div className="px-3 py-2 text-xs text-[#8C7B6B] font-medium truncate">
           {user?.username}
-          <span className="ml-1 text-gray-400">
+          <span className="ml-1 text-[#B0A090]">
             {isAdmin ? '(Admin)' : ''}
           </span>
         </div>
         <button
           onClick={handleLogout}
-          className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-gray-600 hover:bg-red-50 hover:text-red-600 transition-colors w-full"
+          className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-[#5A4A3A] hover:bg-red-50 hover:text-red-600 transition-colors w-full"
         >
           <LogOut size={18} />
           Çıkış Yap
