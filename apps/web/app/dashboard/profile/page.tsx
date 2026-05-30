@@ -8,6 +8,14 @@ interface ContactItem { id: string; type: string; value: string; label: string |
 interface SocialLink { id: string; platform: string; url: string; order: number }
 
 const CONTACT_TYPES = ['PHONE', 'EMAIL', 'WHATSAPP', 'TELEGRAM', 'WEBSITE', 'CUSTOM']
+const CONTACT_TYPE_LABELS: Record<string, string> = {
+  PHONE: 'Telefon',
+  EMAIL: 'E-posta',
+  WHATSAPP: 'WhatsApp',
+  TELEGRAM: 'Telegram',
+  WEBSITE: 'Web Sitesi',
+  CUSTOM: 'Özel',
+}
 const SOCIAL_PLATFORMS = [
   'INSTAGRAM', 'LINKEDIN', 'TWITTER', 'YOUTUBE', 'TIKTOK',
   'FACEBOOK', 'GITHUB', 'BEHANCE', 'DRIBBBLE', 'SPOTIFY', 'SOUNDCLOUD',
@@ -52,6 +60,8 @@ export default function ProfilePage() {
     companyName: '', companyDescription: '', companyWebsite: '', companyIndustry: '',
     showCompanySection: false,
   })
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null)
+  const avatarInputRef = useRef<HTMLInputElement>(null)
   const [companyLogoUrl, setCompanyLogoUrl] = useState<string | null>(null)
   const logoInputRef = useRef<HTMLInputElement>(null)
 
@@ -74,6 +84,7 @@ export default function ProfilePage() {
     ]).then(([profileRes, contactsRes, socialsRes]) => {
       const p = profileRes.data.data
       reset({ displayName: p.displayName, title: p.title || '', bio: p.bio || '' })
+      setAvatarUrl(p.avatarUrl || null)
       setContacts(contactsRes.data.data)
       setSocials(socialsRes.data.data)
       setCompany({
@@ -110,6 +121,20 @@ export default function ProfilePage() {
       showCompanySection: company.showCompanySection,
     })
     flash()
+  }
+
+  const uploadAvatar = async (file: File) => {
+    const form = new FormData()
+    form.append('avatar', file)
+    const res = await api.post('/customer/profile/avatar', form, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    })
+    setAvatarUrl(res.data.data.avatarUrl)
+  }
+
+  const removeAvatar = async () => {
+    await api.put('/customer/profile', { avatarUrl: null })
+    setAvatarUrl(null)
   }
 
   const uploadLogo = async (file: File) => {
@@ -210,6 +235,41 @@ export default function ProfilePage() {
       {/* ---- SEKME: PROFİL ---- */}
       {tab === 'profile' && (
         <>
+          {/* Profil Fotoğrafı */}
+          <div className="card p-6 mb-6">
+            <h2 className="font-semibold text-gray-900 pb-2 border-b border-gray-100 mb-4">Profil Fotoğrafı</h2>
+            <div className="flex items-center gap-5">
+              <div
+                className="relative w-20 h-20 rounded-full overflow-hidden border-2 border-gray-200 bg-gray-100 flex items-center justify-center cursor-pointer shrink-0"
+                onClick={() => avatarInputRef.current?.click()}
+              >
+                {avatarUrl ? (
+                  <img src={`${API_URL}${avatarUrl}`} alt="avatar" className="w-full h-full object-cover" />
+                ) : (
+                  <Upload size={22} className="text-gray-400" />
+                )}
+              </div>
+              <div className="space-y-2">
+                <button type="button" onClick={() => avatarInputRef.current?.click()} className="btn-secondary text-sm">
+                  {avatarUrl ? 'Fotoğrafı Değiştir' : 'Fotoğraf Yükle'}
+                </button>
+                {avatarUrl && (
+                  <button type="button" onClick={removeAvatar} className="block text-sm text-red-500 hover:text-red-700">
+                    Kaldır
+                  </button>
+                )}
+                <p className="text-xs text-gray-400">PNG, JPG — max 5MB</p>
+              </div>
+              <input
+                ref={avatarInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={e => { if (e.target.files?.[0]) uploadAvatar(e.target.files[0]) }}
+              />
+            </div>
+          </div>
+
           <form onSubmit={handleSubmit(onSubmitProfile)} className="card p-6 mb-6 space-y-4">
             <h2 className="font-semibold text-gray-900 pb-2 border-b border-gray-100">Temel Bilgiler</h2>
             <div>
@@ -233,7 +293,7 @@ export default function ProfilePage() {
             <div className="space-y-2 mb-4">
               {contacts.map(c => (
                 <div key={c.id} className="flex items-center gap-2 p-2 bg-gray-50 rounded-lg">
-                  <span className="text-xs font-medium text-gray-500 w-20">{c.type}</span>
+                  <span className="text-xs font-medium text-gray-500 w-20">{CONTACT_TYPE_LABELS[c.type] ?? c.type}</span>
                   <span className="text-sm text-gray-900 flex-1">{c.value}</span>
                   {c.label && <span className="text-xs text-gray-400">{c.label}</span>}
                   <button onClick={() => removeContact(c.id)} className="text-red-400 hover:text-red-600"><Trash2 size={14} /></button>
@@ -242,7 +302,7 @@ export default function ProfilePage() {
             </div>
             <div className="flex gap-2">
               <select value={newContact.type} onChange={e => setNewContact(p => ({ ...p, type: e.target.value }))} className="input w-32">
-                {CONTACT_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
+                {CONTACT_TYPES.map(t => <option key={t} value={t}>{CONTACT_TYPE_LABELS[t]}</option>)}
               </select>
               <input value={newContact.value} onChange={e => setNewContact(p => ({ ...p, value: e.target.value }))} className="input flex-1" placeholder="Değer" />
               <input value={newContact.label} onChange={e => setNewContact(p => ({ ...p, label: e.target.value }))} className="input w-24" placeholder="Etiket" />

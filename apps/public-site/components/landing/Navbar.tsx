@@ -53,6 +53,10 @@ export default function Navbar() {
             <a {...linkProps('#yorumlar')}>Yorumlar</a>
           </nav>
           <div className="nav-cta">
+            <a href="http://localhost:3000/login" className="btn btn-login" aria-label="Müşteri girişi">
+              <svg viewBox="0 0 24 24" fill="none" width="16" height="16"><circle cx="12" cy="8" r="3.5" stroke="currentColor" strokeWidth="1.8"/><path d="M5 19c0-3.3 3.1-6 7-6s7 2.7 7 6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/></svg>
+              Giriş Yap
+            </a>
             <a className="btn btn-primary" {...linkProps('#siparis')}>
               Hemen Al
               <svg viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
@@ -74,6 +78,7 @@ export default function Navbar() {
         <a {...linkProps('#ozellikler')}>Özellikler</a>
         <a {...linkProps('#fiyat')}>Fiyatlar</a>
         <a {...linkProps('#yorumlar')}>Yorumlar</a>
+        <a href="http://localhost:3000/login" className="m-nav-login">Giriş Yap</a>
         <a className="btn btn-primary" {...linkProps('#siparis')}>Hemen Sipariş Ver</a>
       </div>
     </>

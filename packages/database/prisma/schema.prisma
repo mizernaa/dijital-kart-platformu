@@ -127,6 +127,7 @@ model User {
   teamMembersOwned  TeamMember[]     @relation("TeamOwner")
   teamMemberOf      TeamMember[]     @relation("TeamMember")
   teamInvitations   TeamInvitation[] @relation("TeamInvitations")
+  notifications     Notification[]
   createdAt         DateTime      @default(now())
   updatedAt         DateTime      @updatedAt
 
@@ -293,4 +294,16 @@ model TeamInvitation {
 
   @@index([ownerId])
   @@index([token])
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      String
+  message   String
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([userId, isRead])
 }

@@ -1,7 +1,14 @@
 'use client'
 import { useEffect, useState } from 'react'
 import { api } from '@/lib/api'
-import { Users, UserPlus, Trash2, Clock, X, UserCheck } from 'lucide-react'
+import { Users, UserPlus, Trash2, Clock, X, UserCheck, Building2 } from 'lucide-react'
+
+interface Membership {
+  id: string
+  role: 'ADMIN' | 'EDITOR' | 'VIEWER'
+  createdAt: string
+  owner: { id: string; username: string; email: string; profile: { displayName: string; avatarUrl: string | null; slug: string } | null }
+}
 
 interface TeamMember {
   id: string
@@ -40,6 +47,7 @@ const ROLE_LABELS: Record<string, string> = {
 export default function TeamPage() {
   const [data, setData] = useState<TeamData | null>(null)
   const [invitations, setInvitations] = useState<Invitation[]>([])
+  const [memberships, setMemberships] = useState<Membership[]>([])
   const [loading, setLoading] = useState(true)
   const [email, setEmail] = useState('')
   const [role, setRole] = useState<'ADMIN' | 'EDITOR' | 'VIEWER'>('VIEWER')
@@ -49,12 +57,14 @@ export default function TeamPage() {
 
   const fetchAll = async () => {
     try {
-      const [teamRes, invRes] = await Promise.all([
+      const [teamRes, invRes, memberOfRes] = await Promise.all([
         api.get('/customer/team'),
         api.get('/customer/team/invitations'),
+        api.get('/customer/team/member-of'),
       ])
       setData(teamRes.data.data)
       setInvitations(invRes.data.data)
+      setMemberships(memberOfRes.data.data)
     } catch (err) {
       console.error(err)
     } finally {
@@ -62,7 +72,11 @@ export default function TeamPage() {
     }
   }
 
-  useEffect(() => { fetchAll() }, [])
+  useEffect(() => {
+    fetchAll()
+    window.addEventListener('focus', fetchAll)
+    return () => window.removeEventListener('focus', fetchAll)
+  }, [])
 
   const flash = (msg: string, isError = false) => {
     if (isError) { setError(msg); setSuccess('') }
@@ -195,6 +209,39 @@ export default function TeamPage() {
           {inviting ? 'Gönderiliyor...' : 'Davet Gönder'}
         </button>
       </div>
+
+      {/* Dahil olduğum ekipler */}
+      {memberships.length > 0 && (
+        <div className="card p-6 mb-6">
+          <h2 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
+            <Building2 size={16} /> Dahil Olduğum Ekipler
+          </h2>
+          <div className="space-y-3">
+            {memberships.map(m => (
+              <div key={m.id} className="flex items-center justify-between p-3 rounded-xl bg-blue-50 border border-blue-100">
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-full bg-blue-200 flex items-center justify-center text-sm font-medium text-blue-700 overflow-hidden">
+                    {m.owner.profile?.avatarUrl ? (
+                      <img src={m.owner.profile.avatarUrl} alt="" className="w-full h-full object-cover" />
+                    ) : (
+                      (m.owner.profile?.displayName || m.owner.username)[0].toUpperCase()
+                    )}
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-900">
+                      {m.owner.profile?.displayName || m.owner.username}
+                    </p>
+                    <p className="text-xs text-gray-500">{m.owner.email}</p>
+                  </div>
+                </div>
+                <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${ROLE_COLORS[m.role]}`}>
+                  {ROLE_LABELS[m.role]}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Bekleyen davetler */}
       {invitations.length > 0 && (

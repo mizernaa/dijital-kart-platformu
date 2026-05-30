@@ -14,6 +14,8 @@ const PLANS = [
     currency: '₺',
     period: 'tek seferlik',
     featured: false,
+    img: '/assets/plan-klasik.jpg',
+    imgAlt: 'Q-Kart Klasik mat PVC NFC kart',
     features: ['Mat PVC NFC kart', 'Ücretsiz dijital profil', 'Sosyal medya + iletişim', 'Sınırsız güncelleme'],
     cta: 'Klasik\'i Seç',
     dataPlan: 'Klasik',
@@ -25,6 +27,8 @@ const PLANS = [
     currency: '₺',
     period: 'tek seferlik',
     featured: true,
+    img: '/assets/plan-metal.jpg',
+    imgAlt: 'Q-Kart Metal lazer kazıma kart',
     features: ['Premium metal gövde', 'Lazer kazıma logo + isim', 'CV & portföy yükleme', 'Detaylı analitik paneli', 'Öncelikli destek'],
     cta: 'Metal\'i Seç',
     dataPlan: 'Metal',
@@ -37,6 +41,8 @@ const PLANS = [
     currency: '',
     period: '',
     featured: false,
+    img: '/assets/plan-kurumsal.jpg',
+    imgAlt: 'Q-Kart Kurumsal ekip kartları',
     features: ['Toplu kart üretimi', 'Ekip yönetim paneli', 'Marka kimliği şablonu', 'Özel hesap yöneticisi'],
     cta: 'Teklif Al',
     dataPlan: 'Kurumsal',
@@ -73,6 +79,9 @@ export default function Pricing() {
           {PLANS.map((plan) => (
             <div className={`plan${plan.featured ? ' featured' : ''}`} key={plan.name} onMouseMove={onPlanMove}>
               {plan.featured && <span className="tag">En Popüler</span>}
+              <div className="plan-img">
+                <img src={plan.img} alt={plan.imgAlt} loading="lazy" />
+              </div>
               <h3>{plan.name}</h3>
               <p className="ptag">{plan.tagline}</p>
               <div className="price">

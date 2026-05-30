@@ -8,6 +8,7 @@ import { leadsRouter } from './leads'
 import { nfcRouter } from './nfc'
 import { customDomainRouter } from './customDomain'
 import { teamRouter } from './team'
+import { notificationsRouter } from './notifications'
 
 export const customerRouter = Router()
 
@@ -22,3 +23,4 @@ customerRouter.use('/leads', leadsRouter)
 customerRouter.use('/nfc', requirePackageFeature('hasNfc', 'NFC özelliği paketinizde mevcut değil. STARTER veya üstüne geçin.'), nfcRouter)
 customerRouter.use('/custom-domain', requirePackageFeature('hasCustomDomain', 'Özel domain özelliği PRO veya ENTERPRISE pakette mevcuttur.'), customDomainRouter)
 customerRouter.use('/team', teamRouter)
+customerRouter.use('/notifications', notificationsRouter)

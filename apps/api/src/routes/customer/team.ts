@@ -82,6 +82,14 @@ teamRouter.post('/invite', async (req, res, next) => {
       await prisma.teamMember.create({
         data: { ownerId: req.user!.userId, memberId: targetUser.id, role },
       })
+      const ownerProfile = await prisma.profile.findUnique({ where: { userId: req.user!.userId }, select: { displayName: true } })
+      await prisma.notification.create({
+        data: {
+          userId: targetUser.id,
+          type: 'TEAM_ADDED',
+          message: `${ownerProfile?.displayName || 'Bir kullanıcı'} sizi ekibine ekledi.`,
+        },
+      })
       res.json({ success: true, message: 'Kullanıcı ekibe eklendi.', invited: false })
     } else {
       // Davet oluştur
@@ -112,7 +120,15 @@ teamRouter.delete('/:memberId', async (req, res, next) => {
     })
     if (!member) throw new AppError(404, 'Üye bulunamadı.')
 
+    const ownerProfile = await prisma.profile.findUnique({ where: { userId: req.user!.userId }, select: { displayName: true } })
     await prisma.teamMember.delete({ where: { id: member.id } })
+    await prisma.notification.create({
+      data: {
+        userId: req.params.memberId,
+        type: 'TEAM_REMOVED',
+        message: `${ownerProfile?.displayName || 'Bir kullanıcı'} sizi ekibinden çıkardı.`,
+      },
+    })
     res.json({ success: true, message: 'Üye ekipten çıkarıldı.' })
   } catch (err) {
     next(err)
@@ -151,6 +167,29 @@ teamRouter.post('/accept', async (req, res, next) => {
     await prisma.teamInvitation.delete({ where: { id: invitation.id } })
 
     res.json({ success: true, message: 'Ekibe katıldınız.' })
+  } catch (err) {
+    next(err)
+  }
+})
+
+// GET /customer/team/member-of — kullanıcının dahil olduğu ekipler
+teamRouter.get('/member-of', async (req, res, next) => {
+  try {
+    const memberships = await prisma.teamMember.findMany({
+      where: { memberId: req.user!.userId },
+      include: {
+        owner: {
+          select: {
+            id: true,
+            username: true,
+            email: true,
+            profile: { select: { displayName: true, avatarUrl: true, slug: true } },
+          },
+        },
+      },
+      orderBy: { createdAt: 'asc' },
+    })
+    res.json({ success: true, data: memberships })
   } catch (err) {
     next(err)
   }
