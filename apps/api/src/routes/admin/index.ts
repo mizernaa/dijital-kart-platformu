@@ -5,6 +5,7 @@ import { packagesRouter } from './packages'
 import { nfcOrdersRouter } from './nfc-orders'
 import { statsRouter } from './stats'
 import { platformAnalyticsRouter } from './platform-analytics'
+import { ordersRouter } from './orders'
 
 export const adminRouter = Router()
 
@@ -16,3 +17,4 @@ adminRouter.use('/packages', packagesRouter)
 adminRouter.use('/nfc-orders', nfcOrdersRouter)
 adminRouter.use('/stats', statsRouter)
 adminRouter.use('/analytics', platformAnalyticsRouter)
+adminRouter.use('/orders', ordersRouter)

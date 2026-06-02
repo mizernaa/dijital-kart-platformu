@@ -9,6 +9,40 @@ import { ProfileDetail } from '@dkp/types'
 
 export const publicRouter = Router()
 
+// POST /p/order — landing page sipariş formu
+publicRouter.post('/order', async (req, res, next) => {
+  try {
+    const schema = z.object({
+      name: z.string().min(1).max(100),
+      phone: z.string().min(1).max(20),
+      email: z.string().email(),
+      plan: z.enum(['KLASIK', 'METAL', 'KURUMSAL']),
+      note: z.string().max(500).optional(),
+    })
+    const body = schema.safeParse(req.body)
+    if (!body.success) throw new AppError(400, 'Geçersiz form verisi.')
+
+    const order = await prisma.order.create({ data: body.data })
+
+    // Admin'e bildirim oluştur (tüm SUPER_ADMIN ve SUPPORT kullanıcılarına)
+    const admins = await prisma.user.findMany({
+      where: { role: { in: ['SUPER_ADMIN', 'SUPPORT'] } },
+      select: { id: true },
+    })
+    if (admins.length > 0) {
+      await prisma.notification.createMany({
+        data: admins.map(a => ({
+          userId: a.id,
+          type: 'NEW_ORDER',
+          message: `Yeni sipariş: ${body.data.name} — ${body.data.plan} (${body.data.phone})`,
+        })),
+      })
+    }
+
+    res.status(201).json({ success: true, data: { id: order.id } })
+  } catch (err) { next(err) }
+})
+
 // GET /p/domain/:domain — custom domain lookup (auth yok)
 publicRouter.get('/domain/:domain', async (req, res, next) => {
   try {

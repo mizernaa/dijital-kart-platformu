@@ -4,7 +4,7 @@ import { usePathname, useRouter } from 'next/navigation'
 import {
   Users, Package, LayoutDashboard, UserCircle,
   QrCode, BarChart2, LogOut, Settings, CreditCard,
-  MessageSquare, Wifi, TrendingUp, Globe,
+  MessageSquare, Wifi, TrendingUp, Globe, ShoppingBag,
 } from 'lucide-react'
 import { clearAuth, getAuthUser } from '@/lib/auth'
 import { api } from '@/lib/api'
@@ -23,6 +23,7 @@ const adminNav: NavItem[] = [
   { href: '/admin/dashboard', label: 'Dashboard', icon: <LayoutDashboard size={18} /> },
   { href: '/admin/users', label: 'Müşteriler', icon: <Users size={18} /> },
   { href: '/admin/packages', label: 'Paketler', icon: <Package size={18} /> },
+  { href: '/admin/orders', label: 'Siparişler', icon: <ShoppingBag size={18} /> },
   { href: '/admin/nfc-orders', label: 'NFC Siparişler', icon: <Wifi size={18} /> },
   { href: '/admin/analytics', label: 'Analitik', icon: <TrendingUp size={18} /> },
 ]

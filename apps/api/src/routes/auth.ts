@@ -138,3 +138,55 @@ authRouter.post('/change-password', verifyToken, async (req, res, next) => {
     next(err)
   }
 })
+
+// POST /auth/register — self-service kayıt
+authRouter.post('/register', rateLimit({ windowMs: 60 * 60 * 1000, max: 5 }), async (req, res, next) => {
+  try {
+    const schema = z.object({
+      username: z.string().min(3).max(30).regex(/^[a-zA-Z0-9_]+$/, 'Sadece harf, rakam ve _ kullanılabilir.'),
+      email: z.string().email(),
+      password: z.string().min(8),
+      name: z.string().min(1).max(100),
+    })
+    const body = schema.safeParse(req.body)
+    if (!body.success) throw new AppError(400, body.error.errors[0].message)
+
+    const exists = await prisma.user.findFirst({
+      where: { OR: [{ username: body.data.username }, { email: body.data.email }] },
+    })
+    if (exists) throw new AppError(409, 'Bu kullanıcı adı veya e-posta zaten kullanımda.')
+
+    // FREE paketi bul
+    const freePkg = await prisma.package.findFirst({ where: { name: 'FREE' } })
+    if (!freePkg) throw new AppError(500, 'Paket bulunamadı.')
+
+    const passwordHash = await bcrypt.hash(body.data.password, 10)
+    const user = await prisma.user.create({
+      data: {
+        username: body.data.username,
+        email: body.data.email,
+        passwordHash,
+        passwordChanged: true,
+        packageId: freePkg.id,
+        profile: {
+          create: {
+            slug: body.data.username,
+            displayName: body.data.name,
+          },
+        },
+      },
+    })
+
+    const accessToken = signAccessToken({ userId: user.id, role: user.role })
+    const refreshToken = signRefreshToken({ userId: user.id, role: user.role })
+    await prisma.refreshToken.create({ data: { token: refreshToken, userId: user.id, expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) } })
+
+    res.status(201).json({
+      success: true,
+      data: {
+        accessToken, refreshToken,
+        user: { id: user.id, username: user.username, role: user.role, passwordChanged: true },
+      },
+    })
+  } catch (err) { next(err) }
+})

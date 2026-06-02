@@ -27,6 +27,21 @@ export type EventType =
 export type ButtonStyle = 'ROUNDED' | 'SQUARE' | 'PILL'
 export type ProfileShape = 'CIRCLE' | 'SQUARE' | 'HEXAGON'
 export type TeamRole = 'ADMIN' | 'EDITOR' | 'VIEWER'
+export type OrderStatus = 'PENDING' | 'CONFIRMED' | 'SHIPPED' | 'DELIVERED' | 'CANCELLED'
+export type OrderPlan = 'KLASIK' | 'METAL' | 'KURUMSAL'
+
+export interface Order {
+  id: string
+  name: string
+  phone: string
+  email: string
+  plan: OrderPlan
+  note: string | null
+  status: OrderStatus
+  isRead: boolean
+  createdAt: string
+  updatedAt: string
+}
 
 // API Response wrapper
 export interface ApiResponse<T = undefined> {

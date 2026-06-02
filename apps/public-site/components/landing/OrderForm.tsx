@@ -26,16 +26,27 @@ export default function OrderForm() {
     return e
   }
 
-  const submit = (e: FormEvent) => {
+  const submit = async (e: FormEvent) => {
     e.preventDefault()
     const errs = validate()
     if (Object.keys(errs).length) { setErrors(errs); return }
     setLoading(true)
-    setTimeout(() => {
-      setLoading(false)
+    try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
+      const planMap: Record<string, string> = { Klasik: 'KLASIK', Metal: 'METAL', Kurumsal: 'KURUMSAL' }
+      const res = await fetch(`${apiUrl}/p/order`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...formData, plan: planMap[formData.plan] || 'KLASIK' }),
+      })
+      if (!res.ok) throw new Error('Sunucu hatası')
       setSuccess(true)
-      setSuccessMsg(`Teşekkürler ${formData.name.trim()}. Kısa süre içinde ${formData.plan} kartınız için sizinle iletişime geçeceğiz.`)
-    }, 780)
+      setSuccessMsg(`Teşekkürler ${formData.name.trim()}! Kısa süre içinde ${formData.plan} kartınız için sizinle iletişime geçeceğiz.`)
+    } catch {
+      setErrors({ name: 'Bir hata oluştu, lütfen tekrar deneyin.' })
+    } finally {
+      setLoading(false)
+    }
   }
 
   const fields = ['name', 'phone', 'email'] as const
@@ -118,7 +129,7 @@ export default function OrderForm() {
                 <span className="btn-label">Siparişi Tamamla</span>
                 <svg viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
               </button>
-              <p className="order-note">Bilgilerin gizli tutulur. Bu bir demo formudur.</p>
+              <p className="order-note">Bilgilerin gizli tutulur.</p>
             </form>
           ) : (
             <div className={`form-success${success ? ' show' : ''}`} id="formSuccess">
