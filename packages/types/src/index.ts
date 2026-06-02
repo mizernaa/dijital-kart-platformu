@@ -127,6 +127,24 @@ export interface ProfileDetail {
   cvSkills: string | null
   cvLanguages: string | null
   showCvSection: boolean
+  // Genişletilmiş profil
+  location: string | null
+  tagline: string | null
+  available: boolean
+  calendarUrl: string | null
+  stats: string | null        // JSON: [{value,label}]
+  services: string | null     // JSON: [{icon,title,desc}]
+  projects: string | null     // JSON: [{title,category,desc,tags,color}]
+  testimonials: string | null // JSON: [{quote,name,role,company,initials}]
+  experience: string | null   // JSON: [{year,role,company,desc}]
+  education: string | null    // JSON: [{year,degree,school}]
+  showStatsSection: boolean
+  showServicesSection: boolean
+  showProjectsSection: boolean
+  showTestimonialsSection: boolean
+  showCareerSection: boolean
+  showContactForm: boolean
+  showQrSection: boolean
   contacts: ContactItem[]
   socials: SocialLink[]
 }

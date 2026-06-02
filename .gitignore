@@ -6,3 +6,10 @@ dist
 .turbo
 uploads
 *.log
+*.zip
+*.bin
+Q-Kart-design/
+public-design/
+qkart-new-design/
+qkart-profile-design/
+tsconfig.tsbuildinfo

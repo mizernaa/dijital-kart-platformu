@@ -175,6 +175,25 @@ model Profile {
   cvSkills           String? // JSON array: ["React","Node.js"]
   cvLanguages        String? // JSON array: ["Türkçe","İngilizce"]
   showCvSection      Boolean @default(false)
+  // Genişletilmiş profil alanları
+  location           String? // "İstanbul, Türkiye"
+  tagline            String? // Tek cümlelik motto
+  available          Boolean @default(false) // Yeni projelere açık
+  calendarUrl        String? // Calendly / cal.com linki
+  stats              String? // JSON: [{value:"10+",label:"Yıl Deneyim"}]
+  services           String? // JSON: [{icon:"◈",title:"...",desc:"..."}]
+  projects           String? // JSON: [{title,category,desc,tags,color}]
+  testimonials       String? // JSON: [{quote,name,role,company,initials}]
+  experience         String? // JSON: [{year,role,company,desc}]
+  education          String? // JSON: [{year,degree,school}]
+  // Bölüm görünürlük toggle'ları
+  showStatsSection        Boolean @default(true)
+  showServicesSection     Boolean @default(true)
+  showProjectsSection     Boolean @default(true)
+  showTestimonialsSection Boolean @default(true)
+  showCareerSection       Boolean @default(true)
+  showContactForm         Boolean @default(true)
+  showQrSection           Boolean @default(true)
   contacts     ContactItem[]
   socials      SocialLink[]
   qrCode       QRCode?

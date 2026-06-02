@@ -59,6 +59,24 @@ profileRouter.put('/', async (req, res, next) => {
       cvSkills: z.string().optional().nullable(),
       cvLanguages: z.string().optional().nullable(),
       showCvSection: z.boolean().optional(),
+      // Genişletilmiş profil
+      location: z.string().max(100).optional().nullable(),
+      tagline: z.string().max(160).optional().nullable(),
+      available: z.boolean().optional(),
+      calendarUrl: z.string().url().optional().nullable(),
+      stats: z.string().optional().nullable(),
+      services: z.string().optional().nullable(),
+      projects: z.string().optional().nullable(),
+      testimonials: z.string().optional().nullable(),
+      experience: z.string().optional().nullable(),
+      education: z.string().optional().nullable(),
+      showStatsSection: z.boolean().optional(),
+      showServicesSection: z.boolean().optional(),
+      showProjectsSection: z.boolean().optional(),
+      showTestimonialsSection: z.boolean().optional(),
+      showCareerSection: z.boolean().optional(),
+      showContactForm: z.boolean().optional(),
+      showQrSection: z.boolean().optional(),
     })
 
     const body = schema.safeParse(req.body)

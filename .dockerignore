@@ -1,0 +1,14 @@
+node_modules
+dist
+.next
+.env
+.env.local
+.env.*.local
+*.md
+.git
+.gitignore
+.dockerignore
+turbo-build.log
+coverage
+test
+tests

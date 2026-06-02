@@ -9,19 +9,30 @@ import { authRouter } from './routes/auth'
 import { adminRouter } from './routes/admin'
 import { customerRouter } from './routes/customer'
 import { publicRouter } from './routes/public'
+import { healthRouter } from './routes/health'
 import { errorHandler } from './middleware/errorHandler'
 import { scheduleWeeklyReport } from './jobs/weeklyReport'
 
 const app = express()
 const PORT = process.env.API_PORT || 3001
 
-app.use(helmet())
+// CORS origin listesi — production + development fallback
+const allowedOrigins = [
+  process.env.FRONTEND_URL,
+  process.env.PUBLIC_SITE_URL,
+].filter(Boolean) as string[]
+
+if (process.env.NODE_ENV !== 'production') {
+  allowedOrigins.push('http://localhost:3000', 'http://localhost:3002')
+}
+
+app.use(helmet({
+  crossOriginResourcePolicy: { policy: 'cross-origin' },
+  contentSecurityPolicy: process.env.NODE_ENV === 'production' ? undefined : false,
+}))
 app.use(compression())
 app.use(cors({
-  origin: [
-    process.env.FRONTEND_URL || 'http://localhost:3000',
-    process.env.PUBLIC_SITE_URL || 'http://localhost:3002',
-  ],
+  origin: allowedOrigins.length > 0 ? allowedOrigins : '*',
   credentials: true,
 }))
 app.use(express.json({ limit: '10mb' }))
@@ -40,14 +51,11 @@ const generalLimiter = rateLimit({
 app.use(generalLimiter)
 
 // Routes
+app.use('/health', healthRouter)
 app.use('/auth', authRouter)
 app.use('/admin', adminRouter)
 app.use('/customer', customerRouter)
 app.use('/p', publicRouter)
-
-app.get('/health', (_req, res) => {
-  res.json({ status: 'ok', timestamp: new Date().toISOString() })
-})
 
 app.use(errorHandler)
 
