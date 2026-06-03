@@ -172,6 +172,7 @@ authRouter.post('/register', rateLimit({ windowMs: 60 * 60 * 1000, max: 5 }), as
           create: {
             slug: body.data.username,
             displayName: body.data.name,
+            isPublished: true,
           },
         },
       },

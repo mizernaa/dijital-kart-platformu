@@ -5,7 +5,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   return (
     <div className="flex min-h-screen">
       <Sidebar />
-      <div className="flex-1 ml-60 flex flex-col">
+      <div className="flex-1 md:ml-60 flex flex-col">
         <header className="sticky top-0 z-40 flex justify-end items-center px-8 py-3 bg-white/80 backdrop-blur-sm border-b border-gray-100">
           <NotificationBell />
         </header>

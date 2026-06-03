@@ -40,6 +40,30 @@ const SOURCE_COLORS = [
   'from-violet-500 to-purple-500',
 ]
 
+function PublishButton({ slug, onPublished }: { slug: string; onPublished: () => void }) {
+  const [loading, setLoading] = useState(false)
+  const publicSiteUrl = process.env.NEXT_PUBLIC_PUBLIC_SITE_URL || 'http://localhost:3002'
+  const handlePublish = async () => {
+    setLoading(true)
+    try {
+      await import('@/lib/api').then(m => m.api.put('/customer/profile', { isPublished: true }))
+      onPublished()
+    } finally { setLoading(false) }
+  }
+  return (
+    <div className="flex gap-2 shrink-0">
+      <button onClick={handlePublish} disabled={loading}
+        className="px-3 py-1.5 bg-yellow-500 hover:bg-yellow-600 text-white text-xs font-semibold rounded-lg transition-colors disabled:opacity-60 whitespace-nowrap">
+        {loading ? 'Yayınlanıyor...' : 'Yayınla'}
+      </button>
+      <a href={`${publicSiteUrl}/u/${slug}`} target="_blank" rel="noopener noreferrer"
+        className="px-3 py-1.5 bg-white border border-yellow-200 text-yellow-700 text-xs font-semibold rounded-lg hover:bg-yellow-50 transition-colors whitespace-nowrap">
+        Önizle
+      </a>
+    </div>
+  )
+}
+
 function AnimatedNumber({ value }: { value: number | null }) {
   const [display, setDisplay] = useState(0)
   useEffect(() => {
@@ -81,6 +105,22 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-5 animate-fade-up">
+
+      {/* ── Yayında Değil Uyarısı ─────────────────────────────── */}
+      {profile && !profile.isPublished && (
+        <div className="flex items-center justify-between gap-4 bg-yellow-50 border border-yellow-200 rounded-2xl px-5 py-4">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 bg-yellow-100 rounded-xl flex items-center justify-center shrink-0">
+              <Zap size={18} className="text-yellow-600" />
+            </div>
+            <div>
+              <p className="font-semibold text-yellow-900 text-sm">Profilin yayında değil</p>
+              <p className="text-yellow-700 text-xs mt-0.5">Ziyaretçiler profilini göremez. Yayınlamak için tıkla.</p>
+            </div>
+          </div>
+          <PublishButton slug={profile.slug} onPublished={() => setProfile(p => p ? { ...p, isPublished: true } : p)} />
+        </div>
+      )}
 
       {/* ── Hero Header ─────────────────────────────────────────── */}
       <div className="relative rounded-2xl overflow-hidden"

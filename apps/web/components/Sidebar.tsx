@@ -4,7 +4,7 @@ import { usePathname, useRouter } from 'next/navigation'
 import {
   Users, Package, LayoutDashboard, UserCircle,
   QrCode, BarChart2, LogOut, Settings, CreditCard,
-  MessageSquare, Wifi, TrendingUp, Globe, ShoppingBag,
+  MessageSquare, Wifi, TrendingUp, Globe, ShoppingBag, Menu, X,
 } from 'lucide-react'
 import { clearAuth, getAuthUser } from '@/lib/auth'
 import { api } from '@/lib/api'
@@ -34,6 +34,7 @@ export function Sidebar() {
   const user = getAuthUser()
   const isAdmin = user?.role !== 'CUSTOMER'
   const [unreadLeads, setUnreadLeads] = useState(0)
+  const [mobileOpen, setMobileOpen] = useState(false)
 
   useEffect(() => {
     if (isAdmin) return
@@ -41,6 +42,9 @@ export function Sidebar() {
       .then(res => setUnreadLeads(res.data.meta?.unreadCount ?? 0))
       .catch(() => {})
   }, [isAdmin])
+
+  // Sayfa değişince mobile menüyü kapat
+  useEffect(() => { setMobileOpen(false) }, [pathname])
 
   const customerNav: NavItem[] = [
     { href: '/dashboard', label: 'Genel Bakış', icon: <LayoutDashboard size={18} /> },
@@ -65,15 +69,18 @@ export function Sidebar() {
     router.replace('/login')
   }
 
-  return (
-    <aside className="fixed inset-y-0 left-0 w-60 bg-[#FEFCF9] border-r border-[#E8E0D0] flex flex-col z-10">
-      <div className="p-5 border-b border-[#E8E0D0]">
+  const SidebarContent = () => (
+    <>
+      <div className="p-5 border-b border-[#E8E0D0] flex items-center justify-between">
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 bg-gradient-to-br from-[#C45E2A] to-[#E8843A] rounded-lg flex items-center justify-center shadow-sm">
             <span className="text-white font-black text-sm">Q</span>
           </div>
           <span className="font-bold bg-gradient-to-r from-[#C45E2A] to-[#E8843A] bg-clip-text text-transparent text-sm">Q-Kart</span>
         </div>
+        <button className="md:hidden p-1 rounded-lg hover:bg-gray-100" onClick={() => setMobileOpen(false)}>
+          <X size={18} className="text-gray-500" />
+        </button>
       </div>
 
       <nav className="flex-1 p-3 space-y-0.5 overflow-y-auto">
@@ -102,9 +109,7 @@ export function Sidebar() {
       <div className="p-3 border-t border-[#E8E0D0]">
         <div className="px-3 py-2 text-xs text-[#8C7B6B] font-medium truncate">
           {user?.username}
-          <span className="ml-1 text-[#B0A090]">
-            {isAdmin ? '(Admin)' : ''}
-          </span>
+          <span className="ml-1 text-[#B0A090]">{isAdmin ? '(Admin)' : ''}</span>
         </div>
         <button
           onClick={handleLogout}
@@ -114,6 +119,33 @@ export function Sidebar() {
           Çıkış Yap
         </button>
       </div>
-    </aside>
+    </>
+  )
+
+  return (
+    <>
+      {/* Desktop sidebar */}
+      <aside className="hidden md:flex fixed inset-y-0 left-0 w-60 bg-[#FEFCF9] border-r border-[#E8E0D0] flex-col z-10">
+        <SidebarContent />
+      </aside>
+
+      {/* Mobile: hamburger button */}
+      <button
+        className="md:hidden fixed top-4 left-4 z-50 w-10 h-10 bg-white border border-[#E8E0D0] rounded-xl flex items-center justify-center shadow-sm"
+        onClick={() => setMobileOpen(true)}
+      >
+        <Menu size={18} className="text-[#5A4A3A]" />
+      </button>
+
+      {/* Mobile: overlay */}
+      {mobileOpen && (
+        <div className="md:hidden fixed inset-0 z-40 flex">
+          <div className="fixed inset-0 bg-black/40" onClick={() => setMobileOpen(false)} />
+          <aside className="relative flex flex-col w-72 max-w-[85vw] bg-[#FEFCF9] h-full z-50 shadow-xl">
+            <SidebarContent />
+          </aside>
+        </div>
+      )}
+    </>
   )
 }

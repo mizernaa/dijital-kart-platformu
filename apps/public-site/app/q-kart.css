@@ -809,3 +809,27 @@ select.field { appearance: none;
 @media (prefers-reduced-motion: reduce) {
   .m-cta { transition: none; }
 }
+
+/* ─── Navbar: Giriş Yap + Kayıt Ol butonları ─── */
+@media (max-width: 760px) {
+  /* Gizli butonlar zaten .nav-cta .btn hidden oluyor, btn-login da */
+  .btn-login { display: none; }
+}
+
+/* ─── Landing hero sidenav: geniş ekranda göster ─── */
+@media (max-width: 1100px) {
+  .hero-sidenav { display: none; }
+}
+
+/* ─── Public profil sidenav gizle ─── */
+@media (max-width: 900px) {
+  .pv-sidenav { display: none !important; }
+}
+
+/* ─── Dashboard tab scrollable ─── */
+.dashboard-tabs-scroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.dashboard-tabs-scroll::-webkit-scrollbar { display: none; }
