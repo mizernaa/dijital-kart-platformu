@@ -60,52 +60,94 @@ const SECTION_LABELS: { key: SectionKey; label: string; desc: string }[] = [
 function DesignPreview({ design, displayName }: { design: DesignState; displayName: string }) {
   const pal = THEMES.find(t => t.id === design.theme) ?? THEMES[0]
   const isDark = design.theme === 'dark'
-  const btnRadius = design.buttonStyle === 'PILL' ? '9999px' : design.buttonStyle === 'SQUARE' ? '4px' : '12px'
-  const avatarRadius = design.profileShape === 'CIRCLE' ? '9999px' : design.profileShape === 'HEXAGON' ? '0px' : '14px'
+  const bg = isDark ? '#0f0c07' : design.bgColor || pal.bg
+  const bg2 = isDark ? '#161310' : pal.gradFrom
+  const accent = pal.accent
+  const textPrimary = pal.textPrimary
+  const textSub = pal.textSub
+  const cardBorder = pal.cardBorder
+  const btnRadius = design.buttonStyle === 'PILL' ? '9999px' : design.buttonStyle === 'SQUARE' ? '3px' : '10px'
+  const avatarRadius = design.profileShape === 'CIRCLE' ? '9999px' : design.profileShape === 'HEXAGON' ? '0' : '12px'
   const avatarClip = design.profileShape === 'HEXAGON' ? 'polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%)' : undefined
+  const font = design.fontFamily || 'Manrope'
 
   return (
     <div className="sticky top-6">
-      <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3 text-center">Canlı Önizleme</p>
-      <div className="rounded-2xl overflow-hidden shadow-2xl border border-gray-200 mx-auto" style={{ maxWidth: 260, fontFamily: design.fontFamily, background: isDark ? '#0f0c07' : `linear-gradient(160deg,${pal.gradFrom},${design.bgColor})` }}>
-        <div className="px-5 py-6 text-center">
-          <div className="inline-block mb-3 relative">
-            <div style={{ width:64,height:64,borderRadius:avatarRadius,clipPath:avatarClip,display:'flex',alignItems:'center',justifyContent:'center',background:`linear-gradient(135deg,${pal.accent}33,${pal.accent}66)`,border:`2px solid ${pal.accent}44`,fontSize:22,fontWeight:900,color:pal.accent }}>
-              {displayName ? displayName.charAt(0).toUpperCase() : <User size={24}/>}
+      <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3 text-center">Profil Önizlemesi</p>
+      <div className="rounded-2xl overflow-hidden shadow-2xl border mx-auto" style={{ maxWidth: 240, fontFamily: `'${font}', sans-serif`, background: bg, borderColor: isDark ? 'rgba(255,255,255,0.1)' : '#e5e7eb' }}>
+
+        {/* Hero */}
+        <div style={{ background: `linear-gradient(160deg, ${bg2}, ${bg})`, padding: '20px 16px 16px', textAlign: 'center', position: 'relative', overflow: 'hidden' }}>
+          {/* Glow */}
+          <div style={{ position:'absolute', top:-40, right:-40, width:120, height:120, borderRadius:'50%', background: `radial-gradient(${accent}33, transparent)`, pointerEvents:'none' }}/>
+
+          {/* Avatar */}
+          <div style={{ display:'inline-flex', marginBottom:10, position:'relative' }}>
+            <div style={{ width:56, height:56, borderRadius:avatarRadius, clipPath:avatarClip, display:'flex', alignItems:'center', justifyContent:'center', background:`linear-gradient(135deg,${accent}44,${accent}77)`, border:`2px solid ${accent}55`, fontSize:20, fontWeight:900, color: isDark ? bg : '#fff' }}>
+              {displayName ? displayName.charAt(0).toUpperCase() : 'A'}
             </div>
           </div>
-          <p className="font-black text-sm mb-0.5" style={{color:pal.textPrimary}}>{displayName||'İsim Soyisim'}</p>
-          <p className="text-xs font-semibold mb-3" style={{color:pal.accent}}>Ünvan · Şirket</p>
+          <div style={{ fontSize:13, fontWeight:800, color:textPrimary, marginBottom:2 }}>{displayName || 'İsim Soyisim'}</div>
+          <div style={{ fontSize:10, color:accent, fontWeight:600, marginBottom:10 }}>Ünvan · Şirket</div>
 
-          <div className="space-y-1.5 mb-3">
-            {[{icon:<Phone size={12}/>,l:'Ara'},{icon:<Mail size={12}/>,l:'E-posta'},{icon:<Globe size={12}/>,l:'Web Sitesi'}].map(({icon,l})=>(
-              <div key={l} className="flex items-center gap-2 px-3 py-2 text-xs font-medium border" style={{borderRadius:btnRadius,color:pal.textPrimary,borderColor:pal.cardBorder,backgroundColor:isDark?'rgba(255,255,255,0.04)':'rgba(255,255,255,0.6)'}}>
-                <span style={{color:pal.accent}}>{icon}</span>{l}
+          {/* Buttons */}
+          <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:6, marginBottom:8 }}>
+            <div style={{ display:'flex', alignItems:'center', justifyContent:'center', gap:4, padding:'7px 8px', borderRadius:btnRadius, background:`${accent}22`, color:accent, fontSize:10, fontWeight:700 }}>
+              <Download size={9}/> Rehbere Ekle
+            </div>
+            <div style={{ display:'flex', alignItems:'center', justifyContent:'center', gap:4, padding:'7px 8px', borderRadius:btnRadius, background: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)', border:`1px solid ${cardBorder}`, color:textSub, fontSize:10 }}>
+              <Mail size={9}/> İletişim
+            </div>
+          </div>
+        </div>
+
+        {/* Stats band */}
+        {design.showStatsSection && (
+          <div style={{ background: isDark ? '#161310' : bg2, borderTop:`1px solid ${cardBorder}`, borderBottom:`1px solid ${cardBorder}`, padding:'10px 0', display:'grid', gridTemplateColumns:'repeat(4,1fr)' }}>
+            {['10+','50+','12','4.9'].map((v,i) => (
+              <div key={i} style={{ textAlign:'center' }}>
+                <div style={{ fontSize:13, fontWeight:800, color:accent }}>{v}</div>
+                <div style={{ fontSize:8, color:textSub, marginTop:1 }}>{['Yıl','Proje','Müşteri','Puan'][i]}</div>
               </div>
             ))}
           </div>
-          <div className="flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-bold" style={{borderRadius:btnRadius,backgroundColor:pal.buttonBg,color:isDark?'#0f0c07':'#fff',boxShadow:`0 4px 12px ${pal.accent}40`}}>
-            <Download size={11}/> Rehbere Ekle
-          </div>
+        )}
 
-          {design.showStatsSection && (
-            <div className="grid grid-cols-2 gap-1.5 mt-3 pt-3 border-t" style={{borderColor:pal.cardBorder}}>
-              {['10+','50+'].map((v,i)=>(
-                <div key={i} className="text-center">
-                  <div className="font-black text-sm" style={{color:pal.accent}}>{v}</div>
-                  <div className="text-[9px]" style={{color:pal.textSub}}>{i===0?'Yıl Deneyim':'Proje'}</div>
-                </div>
-              ))}
+        {/* Contact cards */}
+        <div style={{ padding:'10px 12px', display:'grid', gridTemplateColumns:'1fr 1fr', gap:6 }}>
+          {[{icon:<Phone size={10}/>,l:'Ara'},{icon:<Mail size={10}/>,l:'E-posta'},{icon:<Globe size={10}/>,l:'Web'},{icon:<Download size={10}/>,l:'Takvim'}].map(({icon,l})=>(
+            <div key={l} style={{ display:'flex', alignItems:'center', gap:6, padding:'7px 8px', borderRadius:btnRadius, border:`1px solid ${cardBorder}`, background: isDark?'rgba(255,255,255,0.03)':'rgba(255,255,255,0.6)', color:textPrimary, fontSize:10 }}>
+              <span style={{color:accent}}>{icon}</span>{l}
+            </div>
+          ))}
+        </div>
+
+        {/* Sections preview */}
+        <div style={{ padding:'0 12px 12px', display:'flex', flexDirection:'column', gap:4 }}>
+          {design.showServicesSection && (
+            <div style={{ borderRadius:8, background: isDark?'rgba(255,255,255,0.04)':'rgba(0,0,0,0.03)', border:`1px solid ${cardBorder}`, padding:'6px 8px', fontSize:9, color:textSub }}>
+              Hizmetler bölümü
+            </div>
+          )}
+          {design.showProjectsSection && (
+            <div style={{ borderRadius:8, background: isDark?'rgba(255,255,255,0.04)':'rgba(0,0,0,0.03)', border:`1px solid ${cardBorder}`, padding:'6px 8px', fontSize:9, color:textSub }}>
+              Projeler bölümü
+            </div>
+          )}
+          {design.showContactForm && (
+            <div style={{ borderRadius:8, background: isDark?'rgba(255,255,255,0.04)':'rgba(0,0,0,0.03)', border:`1px solid ${cardBorder}`, padding:'6px 8px', fontSize:9, color:textSub }}>
+              İletişim formu
             </div>
           )}
         </div>
-        <p className="text-center text-[10px] pb-3 opacity-30" style={{color:pal.textSub}}>Q-Kart ile oluşturuldu</p>
+
+        <p style={{ textAlign:'center', fontSize:9, paddingBottom:10, opacity:0.3, color:textSub }}>Q·Kart ile oluşturuldu</p>
       </div>
       <div className="flex items-center justify-center gap-2 mt-3">
-        <div className="w-3 h-3 rounded-full border border-gray-200" style={{backgroundColor:pal.bg}}/>
-        <span className="text-xs text-gray-400">{THEMES.find(t=>t.id===design.theme)?.label}</span>
+        <div className="w-3 h-3 rounded-full border border-gray-200" style={{backgroundColor:bg}}/>
+        <span className="text-xs text-gray-500 font-medium">{THEMES.find(t=>t.id===design.theme)?.label}</span>
         <span className="text-gray-300">·</span>
-        <span className="text-xs text-gray-400">{design.fontFamily}</span>
+        <span className="text-xs text-gray-400" style={{fontFamily:font}}>{font}</span>
       </div>
     </div>
   )

@@ -142,6 +142,67 @@ function Reveal({ children, delay = 0, className = '' }: { children: React.React
   )
 }
 
+/* ── Tema CSS değişkenleri ── */
+const THEME_VARS: Record<string, React.CSSProperties> = {
+  dark: {},
+  minimal: {
+    '--bg': '#ffffff', '--bg-2': '#f8fafc', '--bg-elev': '#f1f5f9',
+    '--line': 'rgba(0,0,0,0.08)', '--line-2': 'rgba(0,0,0,0.14)',
+    '--text': '#111827', '--muted': '#6b7280', '--faint': '#9ca3af',
+    '--accent': '#3b82f6', '--accent-2': '#1d4ed8', '--accent-glow': 'rgba(59,130,246,0.2)',
+    '--accent-ink': '#ffffff',
+  } as React.CSSProperties,
+  ocean: {
+    '--bg': '#eff6ff', '--bg-2': '#dbeafe', '--bg-elev': '#bfdbfe',
+    '--line': 'rgba(29,78,216,0.12)', '--line-2': 'rgba(29,78,216,0.22)',
+    '--text': '#1e3a8a', '--muted': '#3b82f6', '--faint': '#60a5fa',
+    '--accent': '#1d4ed8', '--accent-2': '#1e40af', '--accent-glow': 'rgba(29,78,216,0.2)',
+    '--accent-ink': '#ffffff',
+  } as React.CSSProperties,
+  forest: {
+    '--bg': '#f0fdf4', '--bg-2': '#dcfce7', '--bg-elev': '#bbf7d0',
+    '--line': 'rgba(21,128,61,0.12)', '--line-2': 'rgba(21,128,61,0.22)',
+    '--text': '#14532d', '--muted': '#16a34a', '--faint': '#4ade80',
+    '--accent': '#15803d', '--accent-2': '#166534', '--accent-glow': 'rgba(21,128,61,0.2)',
+    '--accent-ink': '#ffffff',
+  } as React.CSSProperties,
+  sunset: {
+    '--bg': '#fff7ed', '--bg-2': '#ffedd5', '--bg-elev': '#fed7aa',
+    '--line': 'rgba(194,65,12,0.12)', '--line-2': 'rgba(194,65,12,0.22)',
+    '--text': '#7c2d12', '--muted': '#ea580c', '--faint': '#fb923c',
+    '--accent': '#c2410c', '--accent-2': '#9a3412', '--accent-glow': 'rgba(194,65,12,0.2)',
+    '--accent-ink': '#ffffff',
+  } as React.CSSProperties,
+  purple: {
+    '--bg': '#faf5ff', '--bg-2': '#ede9fe', '--bg-elev': '#ddd6fe',
+    '--line': 'rgba(126,34,206,0.12)', '--line-2': 'rgba(126,34,206,0.22)',
+    '--text': '#4c1d95', '--muted': '#7c3aed', '--faint': '#a78bfa',
+    '--accent': '#7e22ce', '--accent-2': '#6b21a8', '--accent-glow': 'rgba(126,34,206,0.2)',
+    '--accent-ink': '#ffffff',
+  } as React.CSSProperties,
+  rose: {
+    '--bg': '#fff1f2', '--bg-2': '#ffe4e6', '--bg-elev': '#fecdd3',
+    '--line': 'rgba(225,29,72,0.12)', '--line-2': 'rgba(225,29,72,0.22)',
+    '--text': '#881337', '--muted': '#f43f5e', '--faint': '#fb7185',
+    '--accent': '#e11d48', '--accent-2': '#be123c', '--accent-glow': 'rgba(225,29,72,0.2)',
+    '--accent-ink': '#ffffff',
+  } as React.CSSProperties,
+  slate: {
+    '--bg': '#f8fafc', '--bg-2': '#f1f5f9', '--bg-elev': '#e2e8f0',
+    '--line': 'rgba(71,85,105,0.12)', '--line-2': 'rgba(71,85,105,0.22)',
+    '--text': '#1e293b', '--muted': '#64748b', '--faint': '#94a3b8',
+    '--accent': '#475569', '--accent-2': '#334155', '--accent-glow': 'rgba(71,85,105,0.2)',
+    '--accent-ink': '#ffffff',
+  } as React.CSSProperties,
+  amber: {
+    '--bg': '#fffbeb', '--bg-2': '#fef3c7', '--bg-elev': '#fde68a',
+    '--line': 'rgba(217,119,6,0.12)', '--line-2': 'rgba(217,119,6,0.22)',
+    '--text': '#78350f', '--muted': '#b45309', '--faint': '#d97706',
+    '--accent': '#d97706', '--accent-2': '#b45309', '--accent-glow': 'rgba(217,119,6,0.2)',
+    '--accent-ink': '#ffffff',
+  } as React.CSSProperties,
+}
+
 /* ── Contact label helper ── */
 function contactLabel(type: string, label: string | null) {
   if (label) return label
@@ -245,8 +306,13 @@ export function ProfileView({ profile, slug, source }: { profile: Profile; slug:
     { id: 'contact-form', label: 'Bana Yaz' },
   ]
 
+  const themeVars = THEME_VARS[profile.theme] ?? {}
+  const customBg = profile.bgColor && profile.bgColor !== '#ffffff' && profile.theme !== 'dark'
+    ? { '--bg': profile.bgColor } as React.CSSProperties
+    : {}
+
   return (
-    <div style={{ background: 'var(--bg)', minHeight: '100vh', fontFamily: "'Manrope', sans-serif" }}>
+    <div style={{ ...themeVars, ...customBg, background: 'var(--bg)', minHeight: '100vh', fontFamily: profile.fontFamily ? `'${profile.fontFamily}', sans-serif` : "'Manrope', sans-serif" }}>
 
       {/* Fixed side nav */}
       <nav className={`hero-sidenav ${sideNavState === 'full' ? 'full' : sideNavState === 'hidden' ? 'fade' : ''}`}>
