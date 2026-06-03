@@ -153,6 +153,7 @@ export function ProfileView({ profile, slug, source }: { profile: Profile; slug:
   const [leadForm, setLeadForm] = useState({ name: '', email: '', message: '' })
   const [leadStatus, setLeadStatus] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle')
   const [sideNavState, setSideNavState] = useState<'hidden' | 'dim' | 'full'>('hidden')
+  const [activeSection, setActiveSection] = useState<string>('')
 
   const stats = parseJ<StatItem[]>(profile.stats, [])
   const services = parseJ<ServiceItem[]>(profile.services, [])
@@ -170,6 +171,23 @@ export function ProfileView({ profile, slug, source }: { profile: Profile; slug:
   useEffect(() => {
     trackEvent(slug, { eventType: 'PAGE_VIEW', source: source || 'direct' })
   }, [slug, source])
+
+  // IntersectionObserver — aktif bölüm takibi
+  useEffect(() => {
+    const sectionIds = ['sec-bio','contact','sec-socials','sec-services','sec-projects',
+      'sec-testi','sec-career','sec-company','sec-skills','sec-qr','contact-form']
+    const obs = new IntersectionObserver((entries) => {
+      entries.forEach(en => {
+        if (en.isIntersecting) setActiveSection(en.target.id)
+      })
+    }, { threshold: 0.25, rootMargin: '-60px 0px -40% 0px' })
+
+    sectionIds.forEach(id => {
+      const el = document.getElementById(id)
+      if (el) obs.observe(el)
+    })
+    return () => obs.disconnect()
+  }, [])
 
   useEffect(() => {
     const onScroll = () => {
@@ -233,7 +251,10 @@ export function ProfileView({ profile, slug, source }: { profile: Profile; slug:
       {/* Fixed side nav */}
       <nav className={`hero-sidenav ${sideNavState === 'full' ? 'full' : sideNavState === 'hidden' ? 'fade' : ''}`}>
         {NAV_SECTIONS.map(s => (
-          <button key={s.id} className="hsn-item" onClick={() => scrollTo(s.id)} style={{ background: 'none', border: 'none', width: '100%', textAlign: 'left' }}>
+          <button key={s.id}
+            className={`hsn-item${activeSection === s.id ? ' hsn-active' : ''}`}
+            onClick={() => scrollTo(s.id)}
+            style={{ background: 'none', border: 'none', width: '100%', textAlign: 'left' }}>
             <span className="hsn-dot" />
             <span className="hsn-label">{s.label}</span>
           </button>
