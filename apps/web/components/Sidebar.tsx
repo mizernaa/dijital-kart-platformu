@@ -31,10 +31,16 @@ const adminNav: NavItem[] = [
 export function Sidebar() {
   const pathname = usePathname()
   const router = useRouter()
-  const user = getAuthUser()
+  const [user, setUser] = useState<ReturnType<typeof getAuthUser>>(null)
+  const [mounted, setMounted] = useState(false)
   const isAdmin = user?.role !== 'CUSTOMER'
   const [unreadLeads, setUnreadLeads] = useState(0)
   const [mobileOpen, setMobileOpen] = useState(false)
+
+  useEffect(() => {
+    setUser(getAuthUser())
+    setMounted(true)
+  }, [])
 
   useEffect(() => {
     if (isAdmin) return
@@ -84,7 +90,7 @@ export function Sidebar() {
       </div>
 
       <nav className="flex-1 p-3 space-y-0.5 overflow-y-auto">
-        {navItems.map((item) => (
+        {!mounted ? null : navItems.map((item) => (
           <Link
             key={item.href}
             href={item.href}
@@ -108,8 +114,8 @@ export function Sidebar() {
 
       <div className="p-3 border-t border-[#E8E0D0]">
         <div className="px-3 py-2 text-xs text-[#8C7B6B] font-medium truncate">
-          {user?.username}
-          <span className="ml-1 text-[#B0A090]">{isAdmin ? '(Admin)' : ''}</span>
+          {mounted ? user?.username : ''}
+          <span className="ml-1 text-[#B0A090]">{mounted && isAdmin ? '(Admin)' : ''}</span>
         </div>
         <button
           onClick={handleLogout}
