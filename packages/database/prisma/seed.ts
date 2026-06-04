@@ -135,6 +135,61 @@ async function main() {
   })
 
   console.log(`Demo müşteri oluşturuldu: ${customer.username}`)
+  // Landing page fiyatlandırma planlarını oluştur
+  const pricingPlans = [
+    {
+      slug: 'klasik',
+      displayName: 'Klasik',
+      tagline: 'Bireysel kullanım için zarif PVC NFC kart.',
+      price: 399,
+      priceLabel: null,
+      currency: '₺',
+      period: 'tek seferlik',
+      featured: false,
+      features: JSON.stringify(['Mat PVC NFC kart', 'Ücretsiz dijital profil', 'Sosyal medya + iletişim', 'Sınırsız güncelleme']),
+      ctaText: "Klasik'i Seç",
+      sortOrder: 0,
+      isActive: true,
+    },
+    {
+      slug: 'metal',
+      displayName: 'Metal',
+      tagline: 'Lazer kazıma premium metal kart. İz bırak.',
+      price: 899,
+      priceLabel: null,
+      currency: '₺',
+      period: 'tek seferlik',
+      featured: true,
+      features: JSON.stringify(['Premium metal gövde', 'Lazer kazıma logo + isim', 'CV & portföy yükleme', 'Detaylı analitik paneli', 'Öncelikli destek']),
+      ctaText: "Metal'i Seç",
+      sortOrder: 1,
+      isActive: true,
+    },
+    {
+      slug: 'kurumsal',
+      displayName: 'Kurumsal',
+      tagline: 'Ekipler ve şirketler için merkezi yönetim.',
+      price: null,
+      priceLabel: 'Teklif',
+      currency: '',
+      period: '',
+      featured: false,
+      features: JSON.stringify(['Toplu kart üretimi', 'Ekip yönetim paneli', 'Marka kimliği şablonu', 'Özel hesap yöneticisi']),
+      ctaText: 'Teklif Al',
+      sortOrder: 2,
+      isActive: true,
+    },
+  ]
+
+  for (const plan of pricingPlans) {
+    await prisma.pricingPlan.upsert({
+      where: { slug: plan.slug },
+      update: plan,
+      create: plan,
+    })
+  }
+  console.log('3 fiyatlandırma planı oluşturuldu.')
+
   console.log('\n--- SEED TAMAMLANDI ---')
   console.log('Admin girişi: superadmin / Admin1234!')
   console.log('Demo müşteri: ahmetdemir / Musteri123!')

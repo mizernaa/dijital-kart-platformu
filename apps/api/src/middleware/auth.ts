@@ -21,7 +21,7 @@ export function verifyToken(req: Request, _res: Response, next: NextFunction): v
   try {
     const payload = jwt.verify(
       token,
-      process.env.JWT_ACCESS_SECRET || 'secret'
+      process.env.JWT_ACCESS_SECRET || 'access-secret-dev'
     ) as JwtPayload
     req.user = payload
     next()

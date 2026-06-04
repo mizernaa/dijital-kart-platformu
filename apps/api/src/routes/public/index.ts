@@ -9,6 +9,22 @@ import { ProfileDetail } from '@dkp/types'
 
 export const publicRouter = Router()
 
+// GET /p/plans — landing page fiyatlandırma planları (public)
+publicRouter.get('/plans', async (req, res, next) => {
+  try {
+    const plans = await prisma.pricingPlan.findMany({
+      where: { isActive: true },
+      orderBy: { sortOrder: 'asc' },
+    })
+    // features alanını JSON'a parse et
+    const parsed = plans.map(p => ({
+      ...p,
+      features: (() => { try { return JSON.parse(p.features) } catch { return [] } })(),
+    }))
+    res.json({ success: true, data: parsed })
+  } catch (err) { next(err) }
+})
+
 // POST /p/order — landing page sipariş formu
 publicRouter.post('/order', async (req, res, next) => {
   try {

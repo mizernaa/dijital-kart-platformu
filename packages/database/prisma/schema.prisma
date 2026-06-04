@@ -355,3 +355,19 @@ model Notification {
 
   @@index([userId, isRead])
 }
+
+model PricingPlan {
+  id          String  @id @default(cuid())
+  slug        String  @unique
+  displayName String
+  tagline     String  @default("")
+  price       Int?
+  priceLabel  String?
+  currency    String  @default("₺")
+  period      String  @default("tek seferlik")
+  featured    Boolean @default(false)
+  features    String  @default("[]")
+  ctaText     String  @default("Seç")
+  sortOrder   Int     @default(0)
+  isActive    Boolean @default(true)
+}
