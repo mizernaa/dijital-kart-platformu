@@ -64,11 +64,11 @@
 .section-title{font-family:var(--font-display);font-size:clamp(30px,7vw,42px);font-weight:500;color:var(--text);letter-spacing:-.02em;line-height:1.04}
 .section-title em{font-style:italic;color:var(--accent);font-weight:500}
 
-/* ─── Hero ─── */
-.hero{position:relative;min-height:100vh;min-height:100dvh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;overflow:hidden;padding:72px 0 96px}
-.hero-grid{position:absolute;inset:-2px;z-index:0;pointer-events:none;opacity:.5;background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);background-size:46px 46px;-webkit-mask-image:radial-gradient(70% 55% at 50% 42%,#000 0%,transparent 78%);mask-image:radial-gradient(70% 55% at 50% 42%,#000 0%,transparent 78%)}
-.hero-spot{position:absolute;width:560px;height:560px;border-radius:50%;z-index:0;pointer-events:none;filter:blur(70px);opacity:.5;transform:translate(-50%,-50%);left:50%;top:42%;background:radial-gradient(circle,var(--accent-glow),transparent 65%);transition:opacity .5s}
-.hero-inner{position:relative;z-index:2;will-change:transform,opacity}
+/* ─── Hero (profil sayfasına özel, .pv-root ile kapsüllenmiş) ─── */
+.pv-root .hero{position:relative;min-height:100vh;min-height:100dvh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;overflow:hidden;padding:72px 0 96px}
+.pv-hero-grid{position:absolute;inset:-2px;z-index:0;pointer-events:none;opacity:.5;background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);background-size:46px 46px;-webkit-mask-image:radial-gradient(70% 55% at 50% 42%,#000 0%,transparent 78%);mask-image:radial-gradient(70% 55% at 50% 42%,#000 0%,transparent 78%)}
+.pv-hero-spot{position:absolute;width:560px;height:560px;border-radius:50%;z-index:0;pointer-events:none;filter:blur(70px);opacity:.5;transform:translate(-50%,-50%);left:50%;top:42%;background:radial-gradient(circle,var(--accent-glow),transparent 65%);transition:opacity .5s}
+.pv-root .hero-inner{position:relative;z-index:2;will-change:transform,opacity}
 
 /* ─── Avatar ─── */
 .avatar-wrap{position:relative;width:148px;height:148px;margin:0 auto 26px;animation:floaty 7s cubic-bezier(0.2,0.7,0.2,1) infinite}
@@ -96,16 +96,16 @@
 .hero-status .st-time{color:var(--accent);font-variant-numeric:tabular-nums;font-weight:700}
 .hero-status .st-sep{opacity:.35}
 
-/* ─── Buttons ─── */
-.hero-btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-bottom:30px}
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:9px;padding:0 24px;height:52px;border-radius:var(--btn-radius,999px);font-size:14px;font-weight:600;position:relative;overflow:hidden;transition:transform .4s cubic-bezier(0.16,1,0.3,1),box-shadow .4s cubic-bezier(0.2,0.7,0.2,1),background .35s,border-color .35s,color .35s;font-family:var(--font-body)}
-.btn-primary{background:linear-gradient(180deg,var(--accent),var(--accent-2));color:var(--bg)}
-.btn-primary::before{content:'';position:absolute;top:0;left:-130%;width:60%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.45),transparent);transform:skewX(-20deg);pointer-events:none}
-.btn-primary:hover{box-shadow:0 10px 30px var(--accent-glow)}
-.btn-primary:hover::before{animation:sheen .7s cubic-bezier(0.2,0.7,0.2,1) forwards}
-.btn-secondary{background:rgba(255,255,255,.03);color:var(--text);border:1px solid var(--line-2)}
-.btn-secondary:hover{background:var(--bg-elev);border-color:var(--accent);color:var(--accent)}
-.scroll-hint{position:absolute;bottom:26px;left:50%;transform:translateX(-50%);animation:bounceArr 1.8s ease infinite;color:var(--faint);pointer-events:none;z-index:2}
+/* ─── Buttons (profil sayfasına özel) ─── */
+.pv-root .hero-btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-bottom:30px}
+.pv-root .btn{display:inline-flex;align-items:center;justify-content:center;gap:9px;padding:0 24px;height:52px;border-radius:var(--btn-radius,999px);font-size:14px;font-weight:600;position:relative;overflow:hidden;transition:transform .4s cubic-bezier(0.16,1,0.3,1),box-shadow .4s cubic-bezier(0.2,0.7,0.2,1),background .35s,border-color .35s,color .35s;font-family:var(--font-body)}
+.pv-root .btn-primary{background:linear-gradient(180deg,var(--accent),var(--accent-2));color:var(--bg)}
+.pv-root .btn-primary::before{content:'';position:absolute;top:0;left:-130%;width:60%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.45),transparent);transform:skewX(-20deg);pointer-events:none}
+.pv-root .btn-primary:hover{box-shadow:0 10px 30px var(--accent-glow)}
+.pv-root .btn-primary:hover::before{animation:sheen .7s cubic-bezier(0.2,0.7,0.2,1) forwards}
+.pv-root .btn-secondary{background:rgba(255,255,255,.03);color:var(--text);border:1px solid var(--line-2)}
+.pv-root .btn-secondary:hover{background:var(--bg-elev);border-color:var(--accent);color:var(--accent)}
+.pv-root .scroll-hint{position:absolute;bottom:26px;left:50%;transform:translateX(-50%);animation:bounceArr 1.8s ease infinite;color:var(--faint);pointer-events:none;z-index:2}
 
 /* ─── Stats ─── */
 .stats-band{background:var(--bg-2);border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:44px 22px;position:relative;overflow:hidden}

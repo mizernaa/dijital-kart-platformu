@@ -388,7 +388,7 @@ export function ProfileView({ profile, slug, source }: { profile: Profile; slug:
   } as React.CSSProperties
 
   return (
-    <div style={{ ...cssVars, fontFamily: 'var(--font-body)' }}>
+    <div className="pv-root" style={{ ...cssVars, fontFamily: 'var(--font-body)' }}>
       {/* Atmosphere */}
       <div className="aurora"><i className="a1"/><i className="a2"/><i className="a3"/></div>
       <div className="grain"/>
@@ -407,8 +407,8 @@ export function ProfileView({ profile, slug, source }: { profile: Profile; slug:
 
       {/* ── HERO ── */}
       <section className="hero" id="hero">
-        <div className="hero-grid"/>
-        <div className="hero-spot" ref={heroSpotRef}/>
+        <div className="pv-hero-grid"/>
+        <div className="pv-hero-spot" ref={heroSpotRef}/>
         <div className="pw hero-inner" ref={heroInnerRef}>
           <Reveal>
             <div className="avatar-wrap">
