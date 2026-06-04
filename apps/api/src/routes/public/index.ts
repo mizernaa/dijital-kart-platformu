@@ -5,6 +5,7 @@ import { UAParser } from 'ua-parser-js'
 import { prisma } from '@dkp/database'
 import { AppError } from '../../middleware/errorHandler'
 import { generateVCard } from '../../utils/vcard'
+import { sendEmail } from '../../utils/email'
 import { ProfileDetail } from '@dkp/types'
 
 export const publicRouter = Router()
@@ -43,7 +44,7 @@ publicRouter.post('/order', async (req, res, next) => {
     // Admin'e bildirim oluştur (tüm SUPER_ADMIN ve SUPPORT kullanıcılarına)
     const admins = await prisma.user.findMany({
       where: { role: { in: ['SUPER_ADMIN', 'SUPPORT'] } },
-      select: { id: true },
+      select: { id: true, email: true },
     })
     if (admins.length > 0) {
       await prisma.notification.createMany({
@@ -53,6 +54,29 @@ publicRouter.post('/order', async (req, res, next) => {
           message: `Yeni sipariş: ${body.data.name} — ${body.data.plan} (${body.data.phone})`,
         })),
       })
+
+      // Admin'lere e-posta bildirimi (RESEND ayarlı değilse sessizce atlanır)
+      const adminEmails = admins.map(a => a.email).filter(Boolean) as string[]
+      if (adminEmails.length > 0) {
+        const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000'
+        sendEmail({
+          to: adminEmails,
+          subject: `🛒 Yeni sipariş: ${body.data.name} — ${body.data.plan}`,
+          html: `
+            <div style="font-family:sans-serif;max-width:560px;margin:0 auto;padding:24px">
+              <h2 style="color:#1e293b">Yeni sipariş alındı</h2>
+              <table style="width:100%;border-collapse:collapse;margin:16px 0">
+                <tr style="background:#f8fafc"><td style="padding:10px 14px;color:#64748b">Ad Soyad</td><td style="padding:10px 14px;font-weight:600;color:#1e293b">${body.data.name}</td></tr>
+                <tr><td style="padding:10px 14px;color:#64748b">Telefon</td><td style="padding:10px 14px;font-weight:600;color:#1e293b">${body.data.phone}</td></tr>
+                <tr style="background:#f8fafc"><td style="padding:10px 14px;color:#64748b">E-posta</td><td style="padding:10px 14px;font-weight:600;color:#1e293b">${body.data.email}</td></tr>
+                <tr><td style="padding:10px 14px;color:#64748b">Paket</td><td style="padding:10px 14px;font-weight:600;color:#1e293b">${body.data.plan}</td></tr>
+                ${body.data.note ? `<tr style="background:#f8fafc"><td style="padding:10px 14px;color:#64748b">Not</td><td style="padding:10px 14px;color:#1e293b;white-space:pre-wrap">${body.data.note}</td></tr>` : ''}
+              </table>
+              <a href="${frontendUrl}/admin/orders" style="display:inline-block;padding:12px 24px;background:#2563eb;color:#fff;text-decoration:none;border-radius:8px;font-weight:600">Siparişleri Görüntüle</a>
+            </div>
+          `,
+        })
+      }
     }
 
     res.status(201).json({ success: true, data: { id: order.id } })
@@ -186,18 +210,13 @@ publicRouter.post('/:slug/lead', async (req, res, next) => {
       data: { profileId: profile.id, eventType: 'CONTACT_FORM' },
     }).catch(() => {})
 
-    if (process.env.RESEND_API_KEY && process.env.RESEND_API_KEY !== 're_placeholder') {
-      const { Resend } = await import('resend')
-      const resend = new Resend(process.env.RESEND_API_KEY)
-      resend.emails.send({
-        from: process.env.EMAIL_FROM || 'noreply@dijitalkart.com',
-        to: profile.user.email,
-        subject: `Yeni mesaj: ${body.data.name}`,
-        html: `<p><strong>${body.data.name}</strong> size bir mesaj gönderdi.</p>
-               ${body.data.email ? `<p>E-posta: ${body.data.email}</p>` : ''}
-               <p style="white-space:pre-wrap">${body.data.message}</p>`,
-      }).catch(() => {})
-    }
+    sendEmail({
+      to: profile.user.email,
+      subject: `Yeni mesaj: ${body.data.name}`,
+      html: `<p><strong>${body.data.name}</strong> size bir mesaj gönderdi.</p>
+             ${body.data.email ? `<p>E-posta: ${body.data.email}</p>` : ''}
+             <p style="white-space:pre-wrap">${body.data.message}</p>`,
+    })
 
     res.json({ success: true, data: { id: lead.id } })
   } catch (err) {

@@ -1,17 +1,16 @@
 import cron from 'node-cron'
 import { prisma } from '@dkp/database'
-import { Resend } from 'resend'
+import { sendEmail, isEmailEnabled } from '../utils/email'
 
 export function scheduleWeeklyReport() {
   cron.schedule('0 9 * * 1', async () => {
     console.log('[WeeklyReport] Haftalık rapor gönderimi başladı...')
 
-    if (!process.env.RESEND_API_KEY || process.env.RESEND_API_KEY === 're_placeholder') {
+    if (!isEmailEnabled()) {
       console.log('[WeeklyReport] RESEND_API_KEY ayarlı değil, atlandı.')
       return
     }
 
-    const resend = new Resend(process.env.RESEND_API_KEY)
     const since = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
     const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000'
 
@@ -52,8 +51,7 @@ export function scheduleWeeklyReport() {
         const uniqueVisitors = uniqueResult.filter(r => r.ipHash).length
         const topButton = topButtons[0]
 
-        await resend.emails.send({
-          from: process.env.EMAIL_FROM || 'noreply@dijitalkart.com',
+        await sendEmail({
           to: customer.email,
           subject: 'Haftalık Profil Raporu 📊',
           html: `
