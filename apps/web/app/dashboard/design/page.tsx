@@ -40,6 +40,7 @@ const PROFILE_SHAPES = [
 interface DesignState {
   theme: string; bgColor: string; fontFamily: string
   buttonStyle: string; profileShape: string; isPublished: boolean
+  cardStyle: string; typographyDensity: string
   showStatsSection: boolean; showServicesSection: boolean
   showProjectsSection: boolean; showTestimonialsSection: boolean
   showCareerSection: boolean; showContactForm: boolean; showQrSection: boolean
@@ -157,6 +158,7 @@ export default function DesignPage() {
   const [design, setDesign] = useState<DesignState>({
     theme: 'minimal', bgColor: '#ffffff', fontFamily: 'Inter',
     buttonStyle: 'ROUNDED', profileShape: 'CIRCLE', isPublished: false,
+    cardStyle: 'premium', typographyDensity: 'standard',
     showStatsSection: true, showServicesSection: true, showProjectsSection: true,
     showTestimonialsSection: true, showCareerSection: true, showContactForm: true, showQrSection: true,
   })
@@ -176,6 +178,8 @@ export default function DesignPage() {
         buttonStyle: p.buttonStyle || 'ROUNDED',
         profileShape: p.profileShape || 'CIRCLE',
         isPublished: p.isPublished,
+        cardStyle: p.cardStyle || 'premium',
+        typographyDensity: p.typographyDensity || 'standard',
         showStatsSection: p.showStatsSection ?? true,
         showServicesSection: p.showServicesSection ?? true,
         showProjectsSection: p.showProjectsSection ?? true,
@@ -281,6 +285,36 @@ export default function DesignPage() {
                 {PROFILE_SHAPES.map(s => (
                   <button key={s.id} onClick={() => update('profileShape', s.id)}
                     className={`flex-1 py-2 text-xs font-medium border rounded-lg transition-all ${design.profileShape === s.id ? 'border-blue-500 bg-blue-50 text-blue-700' : 'border-gray-200 text-gray-600'}`}>
+                    {s.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Kart stili ve tipografi */}
+        <div className="card p-5">
+          <div className="grid grid-cols-2 gap-6">
+            <div>
+              <h2 className="font-semibold text-gray-900 mb-1">Kart Stili</h2>
+              <p className="text-xs text-gray-400 mb-3">Bölüm kartlarının görünümü</p>
+              <div className="flex gap-2">
+                {[{ id:'premium',label:'Premium' },{ id:'minimal',label:'Minimal' },{ id:'glass',label:'Cam' }].map(s => (
+                  <button key={s.id} onClick={() => update('cardStyle', s.id)}
+                    className={`flex-1 py-2 text-xs font-medium border rounded-lg transition-all ${design.cardStyle === s.id ? 'border-blue-500 bg-blue-50 text-blue-700' : 'border-gray-200 text-gray-600'}`}>
+                    {s.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div>
+              <h2 className="font-semibold text-gray-900 mb-1">Tipografi</h2>
+              <p className="text-xs text-gray-400 mb-3">Bölümler arası boşluk</p>
+              <div className="flex gap-2">
+                {[{ id:'compact',label:'Sıkı' },{ id:'standard',label:'Normal' },{ id:'spacious',label:'Ferah' }].map(s => (
+                  <button key={s.id} onClick={() => update('typographyDensity', s.id)}
+                    className={`flex-1 py-2 text-xs font-medium border rounded-lg transition-all ${design.typographyDensity === s.id ? 'border-blue-500 bg-blue-50 text-blue-700' : 'border-gray-200 text-gray-600'}`}>
                     {s.label}
                   </button>
                 ))}

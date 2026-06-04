@@ -77,6 +77,8 @@ profileRouter.put('/', async (req, res, next) => {
       showCareerSection: z.boolean().optional(),
       showContactForm: z.boolean().optional(),
       showQrSection: z.boolean().optional(),
+      cardStyle: z.enum(['premium', 'minimal', 'glass']).optional(),
+      typographyDensity: z.enum(['compact', 'standard', 'spacious']).optional(),
     })
 
     const body = schema.safeParse(req.body)

@@ -208,6 +208,8 @@ model Profile {
   showCareerSection       Boolean @default(true)
   showContactForm         Boolean @default(true)
   showQrSection           Boolean @default(true)
+  cardStyle               String  @default("premium")
+  typographyDensity       String  @default("standard")
   contacts     ContactItem[]
   socials      SocialLink[]
   qrCode       QRCode?
