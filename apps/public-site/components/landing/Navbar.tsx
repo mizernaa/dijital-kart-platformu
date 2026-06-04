@@ -1,6 +1,8 @@
 'use client'
 import { useState, useEffect, useCallback } from 'react'
 
+const DASHBOARD_URL = process.env.NEXT_PUBLIC_DASHBOARD_URL || 'http://localhost:3000'
+
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
@@ -53,16 +55,38 @@ export default function Navbar() {
             <a {...linkProps('#yorumlar')}>Yorumlar</a>
           </nav>
           <div className="nav-cta">
-            <a href="http://localhost:3000/register" className="btn btn-login" style={{ color: 'var(--accent)', borderColor: 'rgba(212,168,67,.3)' }}>
+            <a href={`${DASHBOARD_URL}/register`} className="btn btn-login" style={{ color: 'var(--accent)', borderColor: 'rgba(212,168,67,.3)' }}>
               Kayıt Ol
             </a>
-            <a href="http://localhost:3000/login" className="btn btn-login" aria-label="Müşteri girişi">
+            <a href={`${DASHBOARD_URL}/login`} className="btn btn-login" aria-label="Müşteri girişi">
               <svg viewBox="0 0 24 24" fill="none" width="16" height="16"><circle cx="12" cy="8" r="3.5" stroke="currentColor" strokeWidth="1.8"/><path d="M5 19c0-3.3 3.1-6 7-6s7 2.7 7 6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/></svg>
               Giriş Yap
             </a>
             <a className="btn btn-primary" {...linkProps('#siparis')}>
               Hemen Al
               <svg viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+            </a>
+            {/* Mobil: hamburger yanında giriş butonu */}
+            <a
+              href={`${DASHBOARD_URL}/login`}
+              className="nav-mobile-login"
+              aria-label="Giriş Yap"
+              style={{
+                display: 'none',
+                alignItems: 'center',
+                gap: 6,
+                fontSize: 13,
+                fontWeight: 600,
+                color: 'var(--accent)',
+                textDecoration: 'none',
+                padding: '6px 10px',
+                borderRadius: 8,
+                border: '1px solid rgba(212,168,67,.3)',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              <svg viewBox="0 0 24 24" fill="none" width="15" height="15"><circle cx="12" cy="8" r="3.5" stroke="currentColor" strokeWidth="1.8"/><path d="M5 19c0-3.3 3.1-6 7-6s7 2.7 7 6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/></svg>
+              Giriş
             </a>
             <button
               className={`nav-toggle${menuOpen ? ' open' : ''}`}
@@ -76,12 +100,19 @@ export default function Navbar() {
         </div>
       </header>
 
+      {/* Mobil login butonu CSS */}
+      <style>{`
+        @media (max-width: 768px) {
+          .nav-mobile-login { display: flex !important; }
+        }
+      `}</style>
+
       <div className={`m-nav${menuOpen ? ' open' : ''}`} id="mNav">
         <a {...linkProps('#nasil')}>Nasıl Çalışır</a>
         <a {...linkProps('#ozellikler')}>Özellikler</a>
         <a {...linkProps('#fiyat')}>Fiyatlar</a>
         <a {...linkProps('#yorumlar')}>Yorumlar</a>
-        <a href="http://localhost:3000/login" className="m-nav-login">Giriş Yap</a>
+        <a href={`${DASHBOARD_URL}/login`} className="m-nav-login">Giriş Yap</a>
         <a className="btn btn-primary" {...linkProps('#siparis')}>Hemen Sipariş Ver</a>
       </div>
     </>
