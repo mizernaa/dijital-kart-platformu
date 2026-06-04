@@ -311,8 +311,18 @@ export function ProfileView({ profile, slug, source }: { profile: Profile; slug:
     ? { '--bg': profile.bgColor } as React.CSSProperties
     : {}
 
+  const avatarRadius = profile.profileShape === 'SQUARE' ? '14px' : profile.profileShape === 'HEXAGON' ? '0px' : '50%'
+  const avatarClip = profile.profileShape === 'HEXAGON' ? 'polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%)' : 'none'
+  const btnRadius = profile.buttonStyle === 'PILL' ? '9999px' : profile.buttonStyle === 'SQUARE' ? '3px' : '14px'
+
+  const shapeVars = {
+    '--avatar-radius': avatarRadius,
+    '--avatar-clip': avatarClip,
+    '--btn-radius': btnRadius,
+  } as React.CSSProperties
+
   return (
-    <div style={{ ...themeVars, ...customBg, background: 'var(--bg)', minHeight: '100vh', fontFamily: profile.fontFamily ? `'${profile.fontFamily}', sans-serif` : "'Manrope', sans-serif" }}>
+    <div style={{ ...themeVars, ...customBg, ...shapeVars, background: 'var(--bg)', minHeight: '100vh', fontFamily: profile.fontFamily ? `'${profile.fontFamily}', sans-serif` : "'Manrope', sans-serif" }}>
 
       {/* Fixed side nav */}
       <nav className={`hero-sidenav ${sideNavState === 'full' ? 'full' : sideNavState === 'hidden' ? 'fade' : ''}`}>

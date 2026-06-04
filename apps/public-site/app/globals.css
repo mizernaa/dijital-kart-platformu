@@ -62,9 +62,9 @@
 /* Avatar */
 .avatar-wrap{position:relative;width:250px;height:250px;margin:0 auto 28px}
 .avatar-halo{position:absolute;inset:-14px;border-radius:50%;border:3px solid var(--accent-glow);animation:spinHalo 8s linear infinite}
-.avatar-circle{width:250px;height:250px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent-2));display:flex;align-items:center;justify-content:center;border:2px solid rgba(212,168,67,.4);position:relative;z-index:1}
+.avatar-circle{width:250px;height:250px;border-radius:var(--avatar-radius,50%);clip-path:var(--avatar-clip,none);background:linear-gradient(135deg,var(--accent),var(--accent-2));display:flex;align-items:center;justify-content:center;border:2px solid rgba(212,168,67,.4);position:relative;z-index:1}
 .avatar-initials{font-family:'Space Grotesk',sans-serif;font-size:72px;font-weight:700;color:var(--bg)}
-.avatar-img{width:250px;height:250px;border-radius:50%;object-fit:cover;border:2px solid rgba(212,168,67,.4);position:relative;z-index:1}
+.avatar-img{width:250px;height:250px;border-radius:var(--avatar-radius,50%);clip-path:var(--avatar-clip,none);object-fit:cover;border:2px solid rgba(212,168,67,.4);position:relative;z-index:1}
 .avail-dot{position:absolute;bottom:6px;right:6px;width:16px;height:16px;background:#22c55e;border-radius:50%;border:2.5px solid var(--bg);z-index:2;animation:availPulse 2s ease infinite}
 
 /* Hero text */
@@ -76,7 +76,7 @@
 
 /* Buttons */
 .hero-btns{display:grid;grid-template-columns:1fr 1fr;gap:12px;width:100%;max-width:340px;margin:0 auto 28px}
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:14px 20px;border-radius:12px;font-size:14px;font-weight:600;min-height:48px;position:relative;overflow:hidden;transition:transform .35s cubic-bezier(.2,.7,.2,1),box-shadow .35s cubic-bezier(.2,.7,.2,1),background .35s,border-color .35s;cursor:pointer;font-family:'Manrope',sans-serif}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:14px 20px;border-radius:var(--btn-radius,12px);font-size:14px;font-weight:600;min-height:48px;position:relative;overflow:hidden;transition:transform .35s cubic-bezier(.2,.7,.2,1),box-shadow .35s cubic-bezier(.2,.7,.2,1),background .35s,border-color .35s;cursor:pointer;font-family:inherit}
 .btn-primary{background:linear-gradient(180deg,var(--accent),var(--accent-2));color:var(--bg);border:none}
 .btn-primary::before{content:'';position:absolute;top:0;left:-130%;width:60%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.35),transparent);transform:skewX(-20deg);pointer-events:none}
 .btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 24px var(--accent-glow)}
@@ -104,7 +104,7 @@
 
 /* ─── Contact cards ─── */
 .contacts-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.cc{display:flex;align-items:center;gap:12px;background:var(--bg-2);border:1px solid var(--line);border-radius:18px;padding:16px;transition:transform .35s cubic-bezier(.2,.7,.2,1),background .35s,border-color .35s,box-shadow .35s;text-decoration:none;color:inherit}
+.cc{display:flex;align-items:center;gap:12px;background:var(--bg-2);border:1px solid var(--line);border-radius:var(--btn-radius,18px);padding:16px;transition:transform .35s cubic-bezier(.2,.7,.2,1),background .35s,border-color .35s,box-shadow .35s;text-decoration:none;color:inherit}
 .cc:hover{background:var(--bg-elev);border-color:var(--line-2);transform:translateY(-4px);box-shadow:0 8px 24px rgba(0,0,0,.35)}
 .cc-icon{color:var(--accent);flex-shrink:0;display:flex;align-items:center}
 .cc-info{flex:1;min-width:0}
@@ -115,7 +115,7 @@
 
 /* ─── Socials ─── */
 .socials-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
-.sc{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;background:var(--bg-2);border:1px solid var(--line);border-radius:12px;padding:16px 8px 12px;transition:all .35s cubic-bezier(.2,.7,.2,1);min-height:72px;text-decoration:none;color:inherit}
+.sc{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;background:var(--bg-2);border:1px solid var(--line);border-radius:var(--btn-radius,12px);padding:16px 8px 12px;transition:all .35s cubic-bezier(.2,.7,.2,1);min-height:72px;text-decoration:none;color:inherit}
 .sc:hover{transform:scale(1.08)}
 .sc-icon{color:var(--muted);transition:color .35s;display:flex;align-items:center}
 .sc-name{font-size:10px;color:var(--faint);font-weight:500;transition:color .35s;text-transform:capitalize}
