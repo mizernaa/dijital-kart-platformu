@@ -21,11 +21,6 @@ function generateUsername(email: string): string {
   return `${prefix}${suffix}`
 }
 
-function setCookie(name: string, value: string, days: number) {
-  const expires = new Date(Date.now() + days * 864e5).toUTCString()
-  document.cookie = `${name}=${value}; expires=${expires}; path=/; SameSite=Lax`
-}
-
 export default function OrderForm() {
   const [formData, setFormData] = useState({
     name: '', phone: '', email: '', password: '', plan: 'Metal', note: '',
@@ -84,13 +79,10 @@ export default function OrderForm() {
         throw new Error(regData.message || 'Kayıt hatası')
       }
 
-      const regData = await regRes.json()
-      const { accessToken, refreshToken, user } = regData.data
-
-      // 2. Sipariş oluştur
+      // 2. Sipariş oluştur (public endpoint — auth gerektirmez)
       await fetch(`${API_URL}/p/order`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken}` },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           name: formData.name.trim(),
           phone: formData.phone,
@@ -100,22 +92,13 @@ export default function OrderForm() {
         }),
       })
 
-      // 3. Oturumu kaydet (cookie + localStorage)
-      setCookie('accessToken', accessToken, 1 / 96) // 15 dakika
-      setCookie('refreshToken', refreshToken, 7)    // 7 gün
-      localStorage.setItem('authUser', JSON.stringify({
-        id: user.id,
-        username: user.username,
-        role: user.role,
-        passwordChanged: true,
-      }))
-
       setStep('creating')
 
-      // 4. Dashboard'a yönlendir
+      // 3. Panel girişine yönlendir (e-posta ön-dolu, belirlenen şifreyle giriş).
+      //    Oturum panel origin'inde kurulur; çapraz-origin aktarımı yapılmaz.
       setTimeout(() => {
-        window.location.href = `${DASHBOARD_URL}/dashboard`
-      }, 2000)
+        window.location.href = `${DASHBOARD_URL}/login?email=${encodeURIComponent(formData.email)}&welcome=1`
+      }, 1500)
 
     } catch (err: any) {
       setErrors({ name: err.message || 'Bir hata oluştu, lütfen tekrar deneyin.' })
@@ -130,7 +113,7 @@ export default function OrderForm() {
           <div style={{ fontSize: 48, marginBottom: 16 }}>✓</div>
           <h2 style={{ color: 'var(--accent)', marginBottom: 12 }}>Hesabın oluşturuldu!</h2>
           <p style={{ color: 'var(--fg-2)', fontSize: 16 }}>
-            Siparişin alındı. Dijital profil panelinize yönlendiriliyorsunuz…
+            Siparişin alındı. Panel girişine yönlendiriliyorsun — e-postan ve belirlediğin şifreyle giriş yap.
           </p>
           <div style={{ marginTop: 24, width: 40, height: 4, background: 'var(--accent)', borderRadius: 2, margin: '24px auto 0', animation: 'progress-bar 2s linear forwards' }} />
           <style>{`@keyframes progress-bar { from { width: 0 } to { width: 200px } }`}</style>

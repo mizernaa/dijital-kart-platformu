@@ -1,5 +1,5 @@
 'use client'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -18,10 +18,19 @@ export default function LoginPage() {
   const router = useRouter()
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const [welcome, setWelcome] = useState(false)
 
-  const { register, handleSubmit, formState: { errors } } = useForm<FormData>({
+  const { register, handleSubmit, setValue, formState: { errors } } = useForm<FormData>({
     resolver: zodResolver(schema),
   })
+
+  // Sipariş formundan gelen yönlendirme: e-postayı ön-doldur + karşılama göster
+  useEffect(() => {
+    const p = new URLSearchParams(window.location.search)
+    const email = p.get('email')
+    if (email) setValue('username', email)
+    if (p.get('welcome') === '1') setWelcome(true)
+  }, [setValue])
 
   const onSubmit = async (data: FormData) => {
     setLoading(true)
@@ -64,18 +73,18 @@ export default function LoginPage() {
         </a>
 
         <div className="login-head">
-          <h1>Tekrar hoş geldin</h1>
-          <p>Hesabınıza giriş yapın</p>
+          <h1>{welcome ? 'Hesabın hazır! 🎉' : 'Tekrar hoş geldin'}</h1>
+          <p>{welcome ? 'Siparişin alındı. Belirlediğin şifreyle giriş yap.' : 'Hesabınıza giriş yapın'}</p>
         </div>
 
         <form onSubmit={handleSubmit(onSubmit)} className="login-form" noValidate>
           <div className="login-field-wrap">
-            <label htmlFor="username" className="login-label">Kullanıcı Adı</label>
+            <label htmlFor="username" className="login-label">Kullanıcı Adı veya E-posta</label>
             <input
               {...register('username')}
               id="username"
               className={`login-field${errors.username ? ' invalid' : ''}`}
-              placeholder="kullanici_adi"
+              placeholder="kullanici_adi veya e-posta"
               autoComplete="username"
               autoFocus
             />

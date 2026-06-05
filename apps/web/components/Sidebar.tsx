@@ -34,7 +34,7 @@ export function Sidebar() {
   const router = useRouter()
   const [user, setUser] = useState<ReturnType<typeof getAuthUser>>(null)
   const [mounted, setMounted] = useState(false)
-  const isAdmin = user?.role !== 'CUSTOMER'
+  const isAdmin = user?.role === 'SUPER_ADMIN' || user?.role === 'SUPPORT'
   const [unreadLeads, setUnreadLeads] = useState(0)
   const [mobileOpen, setMobileOpen] = useState(false)
 

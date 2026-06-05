@@ -1,9 +1,16 @@
 import { ProfileDetail } from '@dkp/types'
 
 export function generateVCard(profile: ProfileDetail): string {
+  // N (yapısal ad) alanı — telefonlar kişi adını buradan okur.
+  // Eksik olduğunda bazı cihazlar ismi ORG (iş yeri) alanından türetir.
+  const nameParts = (profile.displayName || '').trim().split(/\s+/).filter(Boolean)
+  const given = nameParts[0] || ''
+  const family = nameParts.slice(1).join(' ')
+
   const lines: string[] = [
     'BEGIN:VCARD',
     'VERSION:3.0',
+    `N:${family};${given};;;`,
     `FN:${profile.displayName}`,
   ]
 
