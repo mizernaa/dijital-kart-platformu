@@ -132,7 +132,7 @@ export default function SocialPage() {
     setUploading(key)
     try {
       const fd = new FormData(); fd.append('image', file)
-      const res = await api.post('/customer/profile/image', fd)
+      const res = await api.post('/customer/profile/image', fd, { headers: { 'Content-Type': 'multipart/form-data' } })
       return res.data.data.url as string
     } finally { setUploading('') }
   }
