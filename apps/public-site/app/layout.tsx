@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next'
 import './globals.css'
 import './q-kart.css'
+import './social.css'
 
 export const metadata: Metadata = {
   title: { default: 'Q-Kart — Tek dokunuşla, tüm dünyan', template: '%s | Q-Kart' },

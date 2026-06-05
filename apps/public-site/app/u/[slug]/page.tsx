@@ -2,6 +2,7 @@ import { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { fetchProfile } from '@/lib/api'
 import { ProfileView } from '@/components/ProfileView'
+import { SocialView } from '@/components/SocialView'
 
 interface Props {
   params: { slug: string }
@@ -32,6 +33,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function ProfilePage({ params, searchParams }: Props) {
   const profile = await fetchProfile(params.slug)
   if (!profile) notFound()
+
+  if (profile.profileMode === 'SOCIAL') {
+    return <SocialView profile={profile} slug={params.slug} source={searchParams.source} />
+  }
 
   return (
     <ProfileView

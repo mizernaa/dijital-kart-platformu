@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "Profile" ADD COLUMN "profileMode" TEXT NOT NULL DEFAULT 'BUSINESS';
+ALTER TABLE "Profile" ADD COLUMN "socialData" TEXT;

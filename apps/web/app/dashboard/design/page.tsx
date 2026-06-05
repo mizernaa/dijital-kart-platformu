@@ -1,8 +1,9 @@
 'use client'
 import { useEffect, useState, useCallback } from 'react'
 import { api } from '@/lib/api'
+import Link from 'next/link'
 import { THEMES, getPalette, resolveAccent, accentInk, rgba } from '@/lib/themes'
-import { Check, Globe, Phone, Mail, Download, Sun, Moon, Sparkles, RotateCcw } from 'lucide-react'
+import { Check, Globe, Phone, Mail, Download, Sun, Moon, Sparkles, RotateCcw, Briefcase, ArrowRight } from 'lucide-react'
 
 const FONTS = [
   { id: 'Inter',            label: 'Inter' },
@@ -30,6 +31,7 @@ const ACCENT_PRESETS = ['#d4a843', '#3b82f6', '#1d4ed8', '#15803d', '#ea580c', '
 
 interface DesignState {
   theme: string; bgColor: string; accentColor: string | null; fontFamily: string
+  profileMode: string
   buttonStyle: string; profileShape: string; isPublished: boolean
   cardStyle: string; typographyDensity: string
   showStatsSection: boolean; showServicesSection: boolean
@@ -150,6 +152,7 @@ function DesignPreview({ design, displayName }: { design: DesignState; displayNa
 export default function DesignPage() {
   const [design, setDesign] = useState<DesignState>({
     theme: 'minimal', bgColor: '#ffffff', accentColor: null, fontFamily: 'Inter',
+    profileMode: 'BUSINESS',
     buttonStyle: 'ROUNDED', profileShape: 'CIRCLE', isPublished: false,
     cardStyle: 'premium', typographyDensity: 'standard',
     showStatsSection: true, showServicesSection: true, showProjectsSection: true,
@@ -169,6 +172,7 @@ export default function DesignPage() {
         theme: p.theme || 'minimal',
         bgColor: p.bgColor || '#ffffff',
         accentColor: p.accentColor ?? null,
+        profileMode: p.profileMode || 'BUSINESS',
         fontFamily: p.fontFamily || 'Inter',
         buttonStyle: p.buttonStyle || 'ROUNDED',
         profileShape: p.profileShape || 'CIRCLE',
@@ -203,6 +207,12 @@ export default function DesignPage() {
     setDesign(prev => ({ ...prev, [key]: val }))
   }, [])
 
+  const setMode = async (mode: string) => {
+    if (mode === design.profileMode) return
+    setDesign(prev => ({ ...prev, profileMode: mode }))
+    try { await api.put('/customer/profile', { profileMode: mode }) } catch (e) { console.error(e) }
+  }
+
   if (loading) return <div className="text-center py-20 text-gray-400">Yükleniyor...</div>
 
   const currentPal = getPalette(design.theme)
@@ -225,6 +235,40 @@ export default function DesignPage() {
             <button onClick={save} disabled={saving} className="btn-primary">{saving ? 'Kaydediliyor…' : 'Kaydet'}</button>
           </div>
         </div>
+
+        {/* Mod seçimi: İş Kartı / Sosyal */}
+        <div className="card p-5">
+          <h2 className="font-semibold text-gray-900 mb-1">Profil Modu</h2>
+          <p className="text-xs text-gray-400 mb-3">Public sayfanın hangi yüzü yayında olsun? Aynı anda yalnızca biri.</p>
+          <div className="grid grid-cols-2 gap-3">
+            <button onClick={() => setMode('BUSINESS')}
+              className={`flex items-start gap-3 p-4 rounded-xl border-2 text-left transition-all ${design.profileMode === 'BUSINESS' ? 'border-blue-500 ring-2 ring-blue-200 bg-blue-50' : 'border-gray-200 hover:border-gray-300'}`}>
+              <Briefcase size={20} className={design.profileMode === 'BUSINESS' ? 'text-blue-600' : 'text-gray-400'} />
+              <div>
+                <p className="text-sm font-bold text-gray-900">İş Kartı</p>
+                <p className="text-xs text-gray-500 mt-0.5">Kurumsal dijital kartvizit (mevcut)</p>
+              </div>
+              {design.profileMode === 'BUSINESS' && <Check size={16} className="text-blue-500 ml-auto" />}
+            </button>
+            <button onClick={() => setMode('SOCIAL')}
+              className={`flex items-start gap-3 p-4 rounded-xl border-2 text-left transition-all ${design.profileMode === 'SOCIAL' ? 'border-fuchsia-500 ring-2 ring-fuchsia-200 bg-fuchsia-50' : 'border-gray-200 hover:border-gray-300'}`}>
+              <Sparkles size={20} className={design.profileMode === 'SOCIAL' ? 'text-fuchsia-600' : 'text-gray-400'} />
+              <div>
+                <p className="text-sm font-bold text-gray-900">Sosyal</p>
+                <p className="text-xs text-gray-500 mt-0.5">Sosyal medya, galeri, blog & daha fazlası</p>
+              </div>
+              {design.profileMode === 'SOCIAL' && <Check size={16} className="text-fuchsia-500 ml-auto" />}
+            </button>
+          </div>
+          {design.profileMode === 'SOCIAL' && (
+            <Link href="/dashboard/social" className="mt-3 flex items-center justify-between p-3 rounded-xl bg-fuchsia-50 border border-fuchsia-200 text-fuchsia-800 text-sm font-medium hover:bg-fuchsia-100 transition-colors">
+              <span>Sosyal sayfanı düzenle ve özelleştir</span>
+              <ArrowRight size={16} />
+            </Link>
+          )}
+        </div>
+
+        {design.profileMode === 'BUSINESS' && <>
 
         {/* Tema */}
         <div className="card p-5">
@@ -378,6 +422,8 @@ export default function DesignPage() {
           </div>
         </div>
 
+        </>}
+
         {/* Yayın durumu */}
         <div className="card p-5">
           <div className="flex items-center justify-between">
@@ -399,7 +445,18 @@ export default function DesignPage() {
 
       {/* ── Sağ: Canlı önizleme ── */}
       <div className="w-72 flex-shrink-0 hidden lg:block">
-        <DesignPreview design={design} displayName={displayName} />
+        {design.profileMode === 'BUSINESS' ? (
+          <DesignPreview design={design} displayName={displayName} />
+        ) : (
+          <div className="sticky top-6 rounded-2xl border-2 border-dashed border-fuchsia-200 bg-fuchsia-50 p-6 text-center">
+            <Sparkles size={28} className="text-fuchsia-500 mx-auto mb-2" />
+            <p className="text-sm font-semibold text-gray-900">Sosyal mod aktif</p>
+            <p className="text-xs text-gray-500 mt-1 mb-4">Sosyal sayfanı düzenlemek ve canlı önizlemek için Sosyal editörüne git.</p>
+            <Link href="/dashboard/social" className="btn-primary inline-flex items-center gap-2 text-sm">
+              Sosyal Editör <ArrowRight size={14} />
+            </Link>
+          </div>
+        )}
       </div>
     </div>
   )

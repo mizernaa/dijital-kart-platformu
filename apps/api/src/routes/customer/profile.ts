@@ -80,6 +80,10 @@ profileRouter.put('/', async (req, res, next) => {
       showQrSection: z.boolean().optional(),
       cardStyle: z.enum(['premium', 'minimal', 'glass']).optional(),
       typographyDensity: z.enum(['compact', 'standard', 'spacious']).optional(),
+      // Public mod + sosyal içerik
+      profileMode: z.enum(['BUSINESS', 'SOCIAL']).optional(),
+      socialData: z.string().max(120000).optional().nullable()
+        .refine(v => v == null || (() => { try { JSON.parse(v); return true } catch { return false } })(), 'Geçersiz sosyal veri.'),
     })
 
     const body = schema.safeParse(req.body)
@@ -112,6 +116,17 @@ profileRouter.post('/avatar', upload.single('avatar'), async (req, res, next) =>
     })
 
     res.json({ success: true, data: { avatarUrl } })
+  } catch (err) {
+    next(err)
+  }
+})
+
+// POST /customer/profile/image — genel görsel yükleme (galeri, kapak, post, wallpaper)
+profileRouter.post('/image', upload.single('image'), async (req, res, next) => {
+  try {
+    if (!req.file) throw new AppError(400, 'Resim dosyası gerekli.')
+    const url = `/uploads/${req.file.filename}`
+    res.json({ success: true, data: { url } })
   } catch (err) {
     next(err)
   }

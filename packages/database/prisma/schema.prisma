@@ -173,6 +173,9 @@ model Profile {
   bgColor      String       @default("#ffffff")
   accentColor  String?
   fontFamily   String       @default("Inter")
+  // Public mod seçimi: BUSINESS (iş kartı) | SOCIAL (sosyal)
+  profileMode  String       @default("BUSINESS")
+  socialData   String?      // JSON blob: sosyal mod içerik + özelleştirme
   buttonStyle  ButtonStyle  @default(ROUNDED)
   profileShape ProfileShape @default(CIRCLE)
   isPublished          Boolean  @default(false)

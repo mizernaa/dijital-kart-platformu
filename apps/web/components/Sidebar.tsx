@@ -4,7 +4,7 @@ import { usePathname, useRouter } from 'next/navigation'
 import {
   Users, Package, LayoutDashboard, UserCircle,
   QrCode, BarChart2, LogOut, Settings, CreditCard,
-  MessageSquare, Wifi, TrendingUp, Globe, ShoppingBag, Menu, X, Tag,
+  MessageSquare, Wifi, TrendingUp, Globe, ShoppingBag, Menu, X, Tag, Sparkles,
 } from 'lucide-react'
 import { clearAuth, getAuthUser } from '@/lib/auth'
 import { api } from '@/lib/api'
@@ -57,6 +57,7 @@ export function Sidebar() {
     { href: '/dashboard', label: 'Genel Bakış', icon: <LayoutDashboard size={18} /> },
     { href: '/dashboard/profile', label: 'Profilim', icon: <UserCircle size={18} /> },
     { href: '/dashboard/design', label: 'Tasarım', icon: <Settings size={18} /> },
+    { href: '/dashboard/social', label: 'Sosyal', icon: <Sparkles size={18} /> },
     { href: '/dashboard/qr', label: 'QR Kod', icon: <QrCode size={18} /> },
     { href: '/dashboard/analytics', label: 'Analitik', icon: <BarChart2 size={18} /> },
     { href: '/dashboard/leads', label: 'Mesajlar', icon: <MessageSquare size={18} />, badge: unreadLeads },

@@ -130,6 +130,8 @@ export interface ProfileDetail {
   theme: string
   bgColor: string
   accentColor: string | null
+  profileMode: string
+  socialData: string | null
   fontFamily: string
   buttonStyle: ButtonStyle
   profileShape: ProfileShape
