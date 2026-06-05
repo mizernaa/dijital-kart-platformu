@@ -129,6 +129,7 @@ export interface ProfileDetail {
   avatarUrl: string | null
   theme: string
   bgColor: string
+  accentColor: string | null
   fontFamily: string
   buttonStyle: ButtonStyle
   profileShape: ProfileShape

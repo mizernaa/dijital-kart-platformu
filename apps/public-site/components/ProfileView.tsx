@@ -1,12 +1,13 @@
 'use client'
 import { useEffect, useRef, useState, useCallback } from 'react'
 import { trackEvent } from '@/lib/api'
+import { getPalette, resolveAccent, accentInk, rgba, hexToRgb } from '@/lib/themes'
 
 interface ContactItem { id: string; type: string; value: string; label: string | null; order: number }
 interface SocialLink  { id: string; platform: string; url: string; order: number }
 interface Profile {
   slug: string; displayName: string; title: string | null; bio: string | null; avatarUrl: string | null
-  theme: string; bgColor: string; fontFamily: string; buttonStyle: string; profileShape: string
+  theme: string; bgColor: string; accentColor: string | null; fontFamily: string; buttonStyle: string; profileShape: string
   cardStyle: string; typographyDensity: string; isPublished: boolean
   companyName: string | null; companyLogoUrl: string | null; companyDescription: string | null
   companyWebsite: string | null; companyIndustry: string | null; showCompanySection: boolean
@@ -45,28 +46,12 @@ function contactLabel(type: string, label: string | null) {
             WEBSITE:'Web Sitesi', CALENDAR:'Toplantı Ayarla', CUSTOM:'Link' } as any)[type] || type
 }
 
-const THEME_ACCENTS: Record<string, string> = {
-  dark:    '#d4a843', minimal: '#3b82f6', ocean:  '#1d4ed8',
-  forest:  '#15803d', sunset:  '#c2410c', purple: '#7e22ce',
-  rose:    '#e11d48', slate:   '#475569', amber:  '#d97706',
-}
-
 const SC_COLORS: Record<string, string> = {
   LINKEDIN: '#0A66C2', INSTAGRAM: '#E1306C', TWITTER: '#1DA1F2',
   GITHUB: '#e6e6e6',  YOUTUBE: '#FF0000',   BEHANCE: '#1769FF',
   TIKTOK: '#e6e6e6',  FACEBOOK: '#1877F2',  DRIBBBLE: '#EA4C89',
 }
 
-function hexToRgb(h: string): [number, number, number] {
-  h = h.replace('#', '')
-  if (h.length === 3) h = h.split('').map(c => c + c).join('')
-  const n = parseInt(h, 16)
-  return [(n >> 16) & 255, (n >> 8) & 255, n & 255]
-}
-function rgba(h: string, a: number) {
-  const [r, g, b] = hexToRgb(h)
-  return `rgba(${r},${g},${b},${a})`
-}
 function shade(h: string, p: number) {
   const [r, g, b] = hexToRgb(h)
   const f = 1 + p
@@ -206,11 +191,14 @@ export function ProfileView({ profile, slug, source }: { profile: Profile; slug:
   const languages    = parseJ<string[]>(profile.cvLanguages, [])
 
   const initials = profile.displayName.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()
-  const qrUrl    = `${process.env.NEXT_PUBLIC_PUBLIC_SITE_URL || 'http://localhost:3002'}/u/${slug}`
-  const qrSrc    = `https://api.qrserver.com/v1/create-qr-code/?size=376x376&bgcolor=0d0b08&color=ffffff&data=${encodeURIComponent(qrUrl)}`
+  const pal      = getPalette(profile.theme)
+  const accent   = resolveAccent(pal, profile.accentColor)
+  const accent2  = shade(accent, -0.22)
 
-  const accent  = THEME_ACCENTS[profile.theme] || '#d4a843'
-  const accent2 = shade(accent, -0.22)
+  const qrUrl    = `${process.env.NEXT_PUBLIC_PUBLIC_SITE_URL || 'http://localhost:3002'}/u/${slug}`
+  const qrBg     = pal.bg.replace('#', '')
+  const qrFg     = pal.dark ? 'ffffff' : '111111'
+  const qrSrc    = `https://api.qrserver.com/v1/create-qr-code/?size=376x376&bgcolor=${qrBg}&color=${qrFg}&data=${encodeURIComponent(qrUrl)}`
 
   /* ── Body classes ── */
   useEffect(() => {
@@ -222,6 +210,26 @@ export function ProfileView({ profile, slug, source }: { profile: Profile; slug:
     if (profile.typographyDensity === 'spacious') body.classList.add('type-spacious')
     return () => { body.classList.remove('card-minimal','card-glass','type-compact','type-spacious') }
   }, [profile.cardStyle, profile.typographyDensity])
+
+  /* ── Tema paletini :root'a uygula (body arka planı + aurora) ── */
+  useEffect(() => {
+    const root = document.documentElement
+    const [sr, sg, sb] = hexToRgb(accent)
+    const vars: Record<string, string> = {
+      '--bg': pal.bg, '--bg-2': pal.bg2, '--bg-elev': pal.bgElev,
+      '--line': pal.line, '--line-2': pal.line2,
+      '--text': pal.text, '--muted': pal.muted, '--faint': pal.faint,
+      '--accent': accent, '--accent-2': accent2, '--accent-ink': accentInk(accent),
+      '--accent-glow': rgba(accent, pal.dark ? 0.22 : 0.16),
+      '--spark-r': String(sr), '--spark-g': String(sg), '--spark-b': String(sb),
+    }
+    Object.entries(vars).forEach(([k, v]) => root.style.setProperty(k, v))
+    document.body.classList.toggle('pv-light-mode', !pal.dark)
+    return () => {
+      Object.keys(vars).forEach(k => root.style.removeProperty(k))
+      document.body.classList.remove('pv-light-mode')
+    }
+  }, [profile.theme, profile.accentColor]) // eslint-disable-line react-hooks/exhaustive-deps
 
   /* ── Analytics ── */
   useEffect(() => { trackEvent(slug, { eventType: 'PAGE_VIEW', source: source || 'direct' }) }, [slug, source])
@@ -366,19 +374,24 @@ export function ProfileView({ profile, slug, source }: { profile: Profile; slug:
   const avatarClip   = profile.profileShape === 'HEXAGON' ? 'polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%)' : 'none'
   const btnRadius    = profile.buttonStyle === 'PILL' ? '999px' : profile.buttonStyle === 'SQUARE' ? '3px' : '14px'
 
+  const sparkRgb = hexToRgb(accent)
   const cssVars = {
     '--accent':       accent,
     '--accent-2':     accent2,
-    '--accent-glow':  rgba(accent, 0.22),
-    '--accent-soft':  rgba(accent, 0.09),
-    '--bg':           '#0d0b08',
-    '--bg-2':         '#131009',
-    '--bg-elev':      '#1b1710',
-    '--line':         'rgba(255,255,255,0.08)',
-    '--line-2':       'rgba(255,255,255,0.15)',
-    '--text':         '#f4efe6',
-    '--muted':        '#a99e8c',
-    '--faint':        '#6f6557',
+    '--accent-ink':   accentInk(accent),
+    '--accent-glow':  rgba(accent, pal.dark ? 0.22 : 0.16),
+    '--accent-soft':  rgba(accent, pal.dark ? 0.09 : 0.10),
+    '--bg':           pal.bg,
+    '--bg-2':         pal.bg2,
+    '--bg-elev':      pal.bgElev,
+    '--line':         pal.line,
+    '--line-2':       pal.line2,
+    '--text':         pal.text,
+    '--muted':        pal.muted,
+    '--faint':        pal.faint,
+    '--spark-r':      String(sparkRgb[0]),
+    '--spark-g':      String(sparkRgb[1]),
+    '--spark-b':      String(sparkRgb[2]),
     '--font-display': "'Fraunces', Georgia, serif",
     '--font-body':    `'${profile.fontFamily || 'Manrope'}', system-ui, sans-serif`,
     '--font-mono':    "'Space Mono', 'SFMono-Regular', monospace",
@@ -388,7 +401,7 @@ export function ProfileView({ profile, slug, source }: { profile: Profile; slug:
   } as React.CSSProperties
 
   return (
-    <div className="pv-root" style={{ ...cssVars, fontFamily: 'var(--font-body)' }}>
+    <div className={`pv-root ${pal.dark ? 'pv-dark' : 'pv-light'}`} style={{ ...cssVars, fontFamily: 'var(--font-body)' }}>
       {/* Atmosphere */}
       <div className="aurora"><i className="a1"/><i className="a2"/><i className="a3"/></div>
       <div className="grain"/>

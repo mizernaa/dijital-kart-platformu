@@ -171,6 +171,7 @@ model Profile {
   avatarUrl    String?
   theme        String       @default("minimal")
   bgColor      String       @default("#ffffff")
+  accentColor  String?
   fontFamily   String       @default("Inter")
   buttonStyle  ButtonStyle  @default(ROUNDED)
   profileShape ProfileShape @default(CIRCLE)

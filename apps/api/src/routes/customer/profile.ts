@@ -45,6 +45,7 @@ profileRouter.put('/', async (req, res, next) => {
       bio: z.string().max(500).optional(),
       theme: z.string().optional(),
       bgColor: z.string().regex(/^#[0-9a-fA-F]{6}$/).optional(),
+      accentColor: z.string().regex(/^#[0-9a-fA-F]{6}$/).optional().nullable(),
       fontFamily: z.string().optional(),
       buttonStyle: z.enum(['ROUNDED', 'SQUARE', 'PILL']).optional(),
       profileShape: z.enum(['CIRCLE', 'SQUARE', 'HEXAGON']).optional(),

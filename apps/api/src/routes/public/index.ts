@@ -248,6 +248,7 @@ publicRouter.get('/:slug/vcard', async (req, res, next) => {
       avatarUrl: profile.avatarUrl,
       theme: profile.theme,
       bgColor: profile.bgColor,
+      accentColor: (profile as any).accentColor ?? null,
       fontFamily: profile.fontFamily,
       buttonStyle: profile.buttonStyle as ProfileDetail['buttonStyle'],
       profileShape: profile.profileShape as ProfileDetail['profileShape'],
