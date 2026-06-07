@@ -7,6 +7,7 @@ interface NfcOrder {
   id: string
   status: 'PENDING' | 'PRODUCTION' | 'SHIPPED' | 'DELIVERED' | 'CANCELLED'
   trackingNumber: string | null
+  cardModel: string | null
   address: string
   notes: string | null
   createdAt: string
@@ -126,7 +127,7 @@ export default function AdminNfcOrdersPage() {
                 {orders.map(order => (
                   <tr key={order.id} className="hover:bg-gray-50">
                     <td className="px-4 py-3">
-                      <p className="text-sm font-medium text-gray-900">{order.user.username}</p>
+                      <p className="text-sm font-medium text-gray-900">{order.user.username}{order.cardModel ? <span className="ml-2 text-xs font-semibold text-blue-600">{order.cardModel}</span> : null}</p>
                       <p className="text-xs text-gray-400">{order.user.email}</p>
                     </td>
                     <td className="px-4 py-3">

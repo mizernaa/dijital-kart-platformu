@@ -316,6 +316,7 @@ model NfcOrder {
   user           User           @relation(fields: [userId], references: [id], onDelete: Cascade)
   status         NfcOrderStatus @default(PENDING)
   trackingNumber String?
+  cardModel      String?
   address        String
   notes          String?
   createdAt      DateTime       @default(now())
