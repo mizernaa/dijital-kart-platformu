@@ -1,14 +1,19 @@
 import { Router } from 'express'
 import crypto from 'crypto'
 import { z } from 'zod'
+import { rateLimit } from 'express-rate-limit'
 import { UAParser } from 'ua-parser-js'
 import { prisma } from '@dkp/database'
 import { AppError } from '../../middleware/errorHandler'
 import { generateVCard } from '../../utils/vcard'
-import { sendEmail } from '../../utils/email'
+import { sendEmail, escapeHtml } from '../../utils/email'
 import { ProfileDetail } from '@dkp/types'
 
 export const publicRouter = Router()
+
+// Form spam'ine karşı sıkı limit (genel limiter 200/15dk'dan ayrı)
+const orderLimiter = rateLimit({ windowMs: 60 * 60 * 1000, max: 10, standardHeaders: true, legacyHeaders: false })
+const leadLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 10, standardHeaders: true, legacyHeaders: false })
 
 // GET /p/plans — landing page fiyatlandırma planları (public)
 publicRouter.get('/plans', async (req, res, next) => {
@@ -27,7 +32,7 @@ publicRouter.get('/plans', async (req, res, next) => {
 })
 
 // POST /p/order — landing page sipariş formu
-publicRouter.post('/order', async (req, res, next) => {
+publicRouter.post('/order', orderLimiter, async (req, res, next) => {
   try {
     const schema = z.object({
       name: z.string().min(1).max(100),
@@ -66,11 +71,11 @@ publicRouter.post('/order', async (req, res, next) => {
             <div style="font-family:sans-serif;max-width:560px;margin:0 auto;padding:24px">
               <h2 style="color:#1e293b">Yeni sipariş alındı</h2>
               <table style="width:100%;border-collapse:collapse;margin:16px 0">
-                <tr style="background:#f8fafc"><td style="padding:10px 14px;color:#64748b">Ad Soyad</td><td style="padding:10px 14px;font-weight:600;color:#1e293b">${body.data.name}</td></tr>
-                <tr><td style="padding:10px 14px;color:#64748b">Telefon</td><td style="padding:10px 14px;font-weight:600;color:#1e293b">${body.data.phone}</td></tr>
-                <tr style="background:#f8fafc"><td style="padding:10px 14px;color:#64748b">E-posta</td><td style="padding:10px 14px;font-weight:600;color:#1e293b">${body.data.email}</td></tr>
-                <tr><td style="padding:10px 14px;color:#64748b">Paket</td><td style="padding:10px 14px;font-weight:600;color:#1e293b">${body.data.plan}</td></tr>
-                ${body.data.note ? `<tr style="background:#f8fafc"><td style="padding:10px 14px;color:#64748b">Not</td><td style="padding:10px 14px;color:#1e293b;white-space:pre-wrap">${body.data.note}</td></tr>` : ''}
+                <tr style="background:#f8fafc"><td style="padding:10px 14px;color:#64748b">Ad Soyad</td><td style="padding:10px 14px;font-weight:600;color:#1e293b">${escapeHtml(body.data.name)}</td></tr>
+                <tr><td style="padding:10px 14px;color:#64748b">Telefon</td><td style="padding:10px 14px;font-weight:600;color:#1e293b">${escapeHtml(body.data.phone)}</td></tr>
+                <tr style="background:#f8fafc"><td style="padding:10px 14px;color:#64748b">E-posta</td><td style="padding:10px 14px;font-weight:600;color:#1e293b">${escapeHtml(body.data.email)}</td></tr>
+                <tr><td style="padding:10px 14px;color:#64748b">Paket</td><td style="padding:10px 14px;font-weight:600;color:#1e293b">${escapeHtml(body.data.plan)}</td></tr>
+                ${body.data.note ? `<tr style="background:#f8fafc"><td style="padding:10px 14px;color:#64748b">Not</td><td style="padding:10px 14px;color:#1e293b;white-space:pre-wrap">${escapeHtml(body.data.note)}</td></tr>` : ''}
               </table>
               <a href="${frontendUrl}/admin/orders" style="display:inline-block;padding:12px 24px;background:#2563eb;color:#fff;text-decoration:none;border-radius:8px;font-weight:600">Siparişleri Görüntüle</a>
             </div>
@@ -127,8 +132,8 @@ publicRouter.post('/:slug/event', async (req, res, next) => {
   try {
     const schema = z.object({
       eventType: z.enum(['PAGE_VIEW', 'BUTTON_CLICK', 'QR_SCAN', 'NFC_SCAN', 'VCARD_DOWNLOAD', 'CONTACT_FORM']),
-      source: z.string().optional(),
-      buttonLabel: z.string().optional(),
+      source: z.string().max(50).optional(),
+      buttonLabel: z.string().max(100).optional(),
     })
 
     const body = schema.safeParse(req.body)
@@ -175,7 +180,7 @@ publicRouter.post('/:slug/event', async (req, res, next) => {
 })
 
 // POST /p/:slug/lead — lead capture formu
-publicRouter.post('/:slug/lead', async (req, res, next) => {
+publicRouter.post('/:slug/lead', leadLimiter, async (req, res, next) => {
   try {
     const schema = z.object({
       name: z.string().min(1).max(100),
@@ -213,9 +218,9 @@ publicRouter.post('/:slug/lead', async (req, res, next) => {
     sendEmail({
       to: profile.user.email,
       subject: `Yeni mesaj: ${body.data.name}`,
-      html: `<p><strong>${body.data.name}</strong> size bir mesaj gönderdi.</p>
-             ${body.data.email ? `<p>E-posta: ${body.data.email}</p>` : ''}
-             <p style="white-space:pre-wrap">${body.data.message}</p>`,
+      html: `<p><strong>${escapeHtml(body.data.name)}</strong> size bir mesaj gönderdi.</p>
+             ${body.data.email ? `<p>E-posta: ${escapeHtml(body.data.email)}</p>` : ''}
+             <p style="white-space:pre-wrap">${escapeHtml(body.data.message)}</p>`,
     })
 
     res.json({ success: true, data: { id: lead.id } })

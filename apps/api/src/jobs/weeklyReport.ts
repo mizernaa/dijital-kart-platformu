@@ -1,6 +1,6 @@
 import cron from 'node-cron'
 import { prisma } from '@dkp/database'
-import { sendEmail, isEmailEnabled } from '../utils/email'
+import { sendEmail, isEmailEnabled, escapeHtml } from '../utils/email'
 
 export function scheduleWeeklyReport() {
   cron.schedule('0 9 * * 1', async () => {
@@ -56,7 +56,7 @@ export function scheduleWeeklyReport() {
           subject: 'Haftalık Profil Raporu 📊',
           html: `
             <div style="font-family:sans-serif;max-width:560px;margin:0 auto;padding:24px">
-              <h2 style="color:#1e293b">Merhaba ${customer.profile.displayName},</h2>
+              <h2 style="color:#1e293b">Merhaba ${escapeHtml(customer.profile.displayName)},</h2>
               <p style="color:#475569">Son 7 günlük profil özetin:</p>
               <table style="width:100%;border-collapse:collapse;margin:16px 0">
                 <tr style="background:#f8fafc">
@@ -74,7 +74,7 @@ export function scheduleWeeklyReport() {
                 ${topButton ? `
                 <tr>
                   <td style="padding:12px 16px;color:#64748b;font-size:14px">En çok tıklanan</td>
-                  <td style="padding:12px 16px;font-weight:600;color:#1e293b">${topButton.buttonLabel} (${topButton._count.buttonLabel}x)</td>
+                  <td style="padding:12px 16px;font-weight:600;color:#1e293b">${escapeHtml(topButton.buttonLabel)} (${topButton._count.buttonLabel}x)</td>
                 </tr>` : ''}
               </table>
               <a href="${frontendUrl}/dashboard" style="display:inline-block;padding:12px 24px;background:#2563eb;color:#fff;text-decoration:none;border-radius:8px;font-weight:600">Dashboard'a Git</a>

@@ -33,11 +33,13 @@ app.use(helmet({
 }))
 app.use(compression())
 app.use(cors({
-  origin: allowedOrigins.length > 0 ? allowedOrigins : '*',
+  // Production'da origin env'leri tanımsızsa '*'a düşme — cross-origin kapalı kalır (fail-closed).
+  origin: allowedOrigins.length > 0 ? allowedOrigins : (process.env.NODE_ENV === 'production' ? false : '*'),
   credentials: true,
 }))
-app.use(express.json({ limit: '10mb' }))
-app.use(express.urlencoded({ extended: true }))
+// En büyük meşru JSON gövdesi socialData (~120KB); görseller multipart ile gelir.
+app.use(express.json({ limit: '1mb' }))
+app.use(express.urlencoded({ extended: true, limit: '1mb' }))
 
 // Statik dosyalar (upload edilen görseller)
 app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')))

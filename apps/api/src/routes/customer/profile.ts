@@ -7,12 +7,27 @@ import { AppError } from '../../middleware/errorHandler'
 
 export const profileRouter = Router()
 
+// Sadece bilinen görsel tipleri; dosya adına uygun uzantı verilir
+// (uzantısız/serbest tipler tarayıcı sniffing riskini büyütür).
+const IMAGE_EXT: Record<string, string> = {
+  'image/jpeg': '.jpg',
+  'image/png': '.png',
+  'image/webp': '.webp',
+  'image/gif': '.gif',
+}
+
 const upload = multer({
-  dest: path.join(process.cwd(), 'uploads'),
+  storage: multer.diskStorage({
+    destination: path.join(process.cwd(), 'uploads'),
+    filename(_req, file, cb) {
+      const ext = IMAGE_EXT[file.mimetype] || '.bin'
+      cb(null, `${Date.now()}-${Math.random().toString(36).slice(2, 10)}${ext}`)
+    },
+  }),
   limits: { fileSize: 5 * 1024 * 1024 },
   fileFilter(_req, file, cb) {
-    if (!file.mimetype.startsWith('image/')) {
-      return cb(new Error('Sadece resim dosyası yüklenebilir.'))
+    if (!IMAGE_EXT[file.mimetype]) {
+      return cb(new Error('Sadece JPEG, PNG, WebP veya GIF yüklenebilir.'))
     }
     cb(null, true)
   },

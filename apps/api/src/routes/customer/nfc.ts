@@ -2,7 +2,7 @@ import { Router } from 'express'
 import { z } from 'zod'
 import { prisma } from '@dkp/database'
 import { AppError } from '../../middleware/errorHandler'
-import { sendEmail } from '../../utils/email'
+import { sendEmail, escapeHtml } from '../../utils/email'
 
 export const nfcRouter = Router()
 
@@ -52,10 +52,10 @@ nfcRouter.post('/', async (req, res, next) => {
         sendEmail({
           to: emails,
           subject: `🪪 Yeni NFC kart siparişi — ${body.data.cardModel}`,
-          html: `<p><strong>${me?.username || ''}</strong> (${me?.email || ''}) yeni bir NFC kart siparişi verdi.</p>
-                 <p>Model: <strong>${body.data.cardModel}</strong></p>
-                 <p>Teslimat adresi: ${body.data.address}</p>
-                 ${body.data.notes ? `<p>Not: ${body.data.notes}</p>` : ''}
+          html: `<p><strong>${escapeHtml(me?.username)}</strong> (${escapeHtml(me?.email)}) yeni bir NFC kart siparişi verdi.</p>
+                 <p>Model: <strong>${escapeHtml(body.data.cardModel)}</strong></p>
+                 <p>Teslimat adresi: ${escapeHtml(body.data.address)}</p>
+                 ${body.data.notes ? `<p>Not: ${escapeHtml(body.data.notes)}</p>` : ''}
                  <p><a href="${frontendUrl}/admin/nfc-orders">Siparişleri Görüntüle</a></p>`,
         })
       }

@@ -16,6 +16,16 @@ async function getResend(): Promise<Resend | null> {
   return cachedResend
 }
 
+/** Kullanıcı girdisini e-posta HTML'ine gömmeden önce kaçışla (HTML injection önlemi) */
+export function escapeHtml(s: string | null | undefined): string {
+  return String(s ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
+}
+
 export interface SendEmailOptions {
   to: string | string[]
   subject: string

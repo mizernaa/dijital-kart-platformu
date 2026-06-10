@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from 'express'
 import jwt from 'jsonwebtoken'
 import { JwtPayload, UserRole } from '@dkp/types'
 import { AppError } from './errorHandler'
+import { ACCESS_SECRET } from '../utils/jwt'
 
 declare global {
   namespace Express {
@@ -19,10 +20,7 @@ export function verifyToken(req: Request, _res: Response, next: NextFunction): v
 
   const token = authHeader.slice(7)
   try {
-    const payload = jwt.verify(
-      token,
-      process.env.JWT_ACCESS_SECRET || 'access-secret-dev'
-    ) as JwtPayload
+    const payload = jwt.verify(token, ACCESS_SECRET) as JwtPayload
     req.user = payload
     next()
   } catch {

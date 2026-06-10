@@ -49,6 +49,23 @@ function linkHref(url: string) {
   if (/^(https?:|mailto:|tel:)/.test(url)) return url
   return `https://${url}`
 }
+
+/**
+ * Müzik embed URL'i — yalnızca Spotify/SoundCloud host'larına izin verilir.
+ * (Kullanıcı verisinden gelen URL doğrulanmadan iframe'e gömülmemeli.)
+ */
+function musicEmbedSrc(music: { type: string; url: string }, accent: string): string | null {
+  try {
+    const u = new URL(music.url)
+    if (u.protocol !== 'https:') return null
+    if (music.type === 'soundcloud') {
+      if (!/(^|\.)soundcloud\.com$/.test(u.hostname)) return null
+      return `https://w.soundcloud.com/player/?url=${encodeURIComponent(u.href)}&color=%23${accent.replace('#', '')}&visual=true`
+    }
+    if (u.hostname !== 'open.spotify.com') return null
+    return u.href.replace('open.spotify.com/', 'open.spotify.com/embed/')
+  } catch { return null }
+}
 function prettyHost(url: string) {
   try { return new URL(linkHref(url)).hostname.replace('www.', '') } catch { return url }
 }
@@ -172,20 +189,23 @@ export function SocialView({ profile, slug, source }: { profile: SocialProfile; 
         )}
 
         {/* Müzik */}
-        {data.show.music && data.music.url && (
-          <Reveal>
-            <section className="sv-section">
-              <h2 className="sv-sec-title">Müzik</h2>
-              <div className="sv-music">
-                <iframe
-                  src={data.music.type === 'soundcloud'
-                    ? `https://w.soundcloud.com/player/?url=${encodeURIComponent(data.music.url)}&color=%23${st.accent.replace('#', '')}&visual=true`
-                    : data.music.url.replace('open.spotify.com/', 'open.spotify.com/embed/')}
-                  width="100%" height={data.music.type === 'soundcloud' ? 160 : 152} frameBorder="0" allow="encrypted-media" loading="lazy" />
-              </div>
-            </section>
-          </Reveal>
-        )}
+        {data.show.music && data.music.url && (() => {
+          const embedSrc = musicEmbedSrc(data.music, st.accent)
+          if (!embedSrc) return null
+          return (
+            <Reveal>
+              <section className="sv-section">
+                <h2 className="sv-sec-title">Müzik</h2>
+                <div className="sv-music">
+                  <iframe
+                    src={embedSrc}
+                    sandbox="allow-scripts allow-same-origin allow-popups"
+                    width="100%" height={data.music.type === 'soundcloud' ? 160 : 152} frameBorder="0" allow="encrypted-media" loading="lazy" />
+                </div>
+              </section>
+            </Reveal>
+          )
+        })()}
 
         {/* Blog / Notlar */}
         {data.show.posts && data.posts.length > 0 && (
