@@ -1,8 +1,8 @@
 import { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { fetchProfile } from '@/lib/api'
-import { ProfileView } from '@/components/ProfileView'
 import { SocialView } from '@/components/SocialView'
+import { SignatureView } from '@/components/SignatureView'
 
 interface Props {
   params: { slug: string }
@@ -38,11 +38,5 @@ export default async function ProfilePage({ params, searchParams }: Props) {
     return <SocialView profile={profile} slug={params.slug} source={searchParams.source} />
   }
 
-  return (
-    <ProfileView
-      profile={profile}
-      slug={params.slug}
-      source={searchParams.source}
-    />
-  )
+  return <SignatureView profile={profile} slug={params.slug} source={searchParams.source} />
 }
