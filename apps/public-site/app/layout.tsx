@@ -5,6 +5,7 @@ import './social.css'
 import './signature.css'
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_PUBLIC_SITE_URL || 'http://localhost:3002'),
   title: { default: 'Q-Kart — Tek dokunuşla, tüm dünyan', template: '%s | Q-Kart' },
   description: 'Q-Kart, NFC\'li akıllı dijital kimlik kartı. Kartvizitin, sosyal medyan, CV\'n ve ekibin tek dokunuşla karşındakinde.',
   openGraph: {

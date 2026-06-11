@@ -18,6 +18,7 @@ export interface SocialBg {
 export interface SocialShow {
   links: boolean; gallery: boolean; posts: boolean; music: boolean
   interests: boolean; socials: boolean; contactForm: boolean
+  reaction: boolean
 }
 
 export interface SocialEffects { grain: boolean; glow: boolean; tilt: boolean }
@@ -64,7 +65,7 @@ export function defaultSocialData(): SocialData {
     bg: { type: 'vibe', gradient: v.gradient, angle: v.angle, animated: v.animated },
     linkStyle: 'glass', avatarStyle: 'CIRCLE',
     effects: { grain: true, glow: true, tilt: true },
-    show: { links: true, gallery: true, posts: true, music: true, interests: true, socials: true, contactForm: true },
+    show: { links: true, gallery: true, posts: true, music: true, interests: true, socials: true, contactForm: true, reaction: true },
   }
 }
 

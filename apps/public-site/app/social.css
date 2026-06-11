@@ -126,3 +126,104 @@
 .sv-lightbox { position: fixed; inset: 0; z-index: 100; background: rgba(0,0,0,.88); display: flex; align-items: center; justify-content: center; padding: 20px; cursor: zoom-out; animation: svFade .2s ease; }
 .sv-lightbox img { max-width: 100%; max-height: 100%; border-radius: 14px; box-shadow: 0 20px 60px rgba(0,0,0,.5); }
 @keyframes svFade { from { opacity: 0 } to { opacity: 1 } }
+
+/* ═══════════ SOSYAL v2 — "Bento Sahne" ═══════════ */
+.sv2 { padding-bottom: 90px; }
+
+/* Poster kapak */
+.sv2-poster { position: relative; height: min(62svh, 560px); min-height: 380px; overflow: hidden; display: flex; flex-direction: column; justify-content: flex-end; }
+.sv2-poster-media { position: absolute; inset: 0; background-size: cover; background-position: center 30%; will-change: transform, opacity; }
+.sv2-poster-top { position: absolute; top: 0; left: 0; right: 0; display: flex; justify-content: space-between; align-items: center; padding: 18px 20px; z-index: 2; }
+.sv2-handle { font-size: 13px; font-weight: 700; color: #fff; background: rgba(0,0,0,.35); padding: 6px 13px; border-radius: 999px; backdrop-filter: blur(8px); }
+.sv2-loc { font-size: 12px; color: #fff; background: rgba(0,0,0,.35); padding: 6px 12px; border-radius: 999px; backdrop-filter: blur(8px); }
+.sv2-name { position: relative; z-index: 2; margin: 0; padding: 0 18px 4px; font-weight: 800; text-transform: uppercase; letter-spacing: -.04em; line-height: .9; font-size: clamp(52px, 15vw, 110px); color: #fff; mix-blend-mode: screen; }
+.sv2-name span { display: block; animation: sv2Rise .9s cubic-bezier(.2,.7,.2,1) both; }
+.sv2-name span:nth-child(2) { animation-delay: .1s; color: var(--sv-accent); mix-blend-mode: normal; }
+@keyframes sv2Rise { from { transform: translateY(60%); opacity: 0 } to { transform: none; opacity: 1 } }
+.sv2-status { position: relative; z-index: 2; margin: 10px 18px 20px; align-self: flex-start; font-size: 13px; font-weight: 700; color: var(--sv-accent); background: color-mix(in srgb, var(--sv-accent) 16%, transparent); border: 1px solid color-mix(in srgb, var(--sv-accent) 45%, transparent); padding: 7px 14px; border-radius: 999px; backdrop-filter: blur(8px); }
+
+/* Gövde */
+.sv2-wrap { position: relative; z-index: 1; max-width: 480px; margin: 0 auto; padding: 20px 16px 0; display: flex; flex-direction: column; gap: 18px; }
+.sv2-bio { margin: 0 4px; font-size: 14.5px; line-height: 1.6; color: var(--sv-muted); }
+
+/* Anlar şeridi */
+.sv2-stories { display: flex; gap: 11px; align-items: center; overflow-x: auto; padding: 4px 2px 8px; scrollbar-width: none; }
+.sv2-stories::-webkit-scrollbar { display: none; }
+.sv2-story { flex-shrink: 0; width: 64px; height: 64px; padding: 3px; border-radius: 50%; border: 2px solid var(--sv-accent); background: transparent; cursor: pointer; animation: svFade .5s both; }
+.sv2-story img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+.sv2-story:hover { transform: scale(1.06); transition: transform .2s; }
+.sv2-stories-lbl { font-size: 11px; color: var(--sv-muted); margin-left: auto; padding-right: 4px; flex-shrink: 0; }
+
+/* Bento ızgara */
+.sv2-bento { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.sv2-bento > .cell-w { grid-column: span 2; }
+.sv2-cell { display: block; width: 100%; border-radius: 18px; background: var(--sv-surface); border: 1px solid var(--sv-border); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); color: var(--sv-text); font-family: inherit; text-align: left; }
+
+/* Link hücresi */
+.sv2-link { display: flex; align-items: center; gap: 12px; padding: 15px 16px; transition: transform .18s cubic-bezier(.2,.7,.2,1), box-shadow .18s; }
+.sv2-link:hover { transform: translateY(-2px); box-shadow: 0 12px 30px rgba(0,0,0,.22); }
+.sv2-link:active { transform: scale(.985); }
+.sv2-link .ic { width: 40px; height: 40px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; border-radius: 12px; background: var(--sv-accent); color: var(--sv-ink); overflow: hidden; }
+.sv2-link .ic img { width: 100%; height: 100%; object-fit: cover; }
+.sv2-link .txt { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.sv2-link .txt b { font-size: 14.5px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sv2-link .txt small { font-size: 11.5px; color: var(--sv-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sv2-link .arrow { color: var(--sv-accent); font-size: 18px; font-weight: 700; transition: transform .2s; }
+.sv2-link:hover .arrow { transform: translateX(4px); }
+
+/* Müzik hücresi */
+.sv2-music { padding: 14px; min-height: 104px; cursor: pointer; display: flex; flex-direction: column; gap: 8px; }
+.sv2-music .np { display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 700; color: var(--sv-accent); }
+.sv2-music .eq { display: flex; gap: 3px; align-items: flex-end; height: 16px; }
+.sv2-music .eq i { width: 3.5px; background: var(--sv-accent); border-radius: 2px; animation: sv2Eq 1s ease-in-out infinite alternate; }
+@keyframes sv2Eq { from { transform: scaleY(.4) } to { transform: scaleY(1) } }
+.sv2-music small { font-size: 11px; color: var(--sv-muted); }
+
+/* Tepki hücresi */
+.sv2-react { padding: 14px; min-height: 104px; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; transition: transform .15s; }
+.sv2-react:active { transform: scale(.94); }
+.sv2-react .fire { font-size: 24px; transition: transform .3s cubic-bezier(.34,1.56,.64,1); }
+.sv2-react.done .fire { transform: scale(1.25); }
+.sv2-react b { font-size: 17px; font-weight: 800; }
+.sv2-react small { font-size: 10.5px; color: var(--sv-muted); }
+
+/* İlgi & sosyal hücreleri */
+.sv2-tags { padding: 13px 14px; }
+.sv2-tags small { font-size: 10.5px; color: var(--sv-muted); display: block; margin-bottom: 8px; }
+.sv2-tags .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.sv2-tags .chips span { font-size: 11.5px; font-weight: 600; padding: 4px 11px; border-radius: 999px; background: var(--sv-border); }
+.sv2-socials { padding: 13px 14px; display: flex; flex-wrap: wrap; gap: 9px; align-items: center; justify-content: center; min-height: 64px; }
+.sv2-socials a { width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 50%; background: var(--sv-border); color: var(--sv-text); transition: transform .2s, background .2s, color .2s; }
+.sv2-socials a:hover { transform: translateY(-3px); background: var(--sv-accent); color: var(--sv-ink); }
+
+/* Not hücresi */
+.sv2-post { overflow: hidden; }
+.sv2-post .pimg { width: 100%; max-height: 200px; object-fit: cover; display: block; }
+.sv2-post .pbody { padding: 13px 15px; }
+.sv2-post time { font-size: 10.5px; color: var(--sv-muted); font-weight: 600; }
+.sv2-post h3 { font-size: 15.5px; font-weight: 700; margin: 4px 0 5px; }
+.sv2-post p { font-size: 13px; line-height: 1.6; color: var(--sv-muted); white-space: pre-wrap; margin: 0; }
+
+/* Çalar */
+.sv2-player-embed { border-radius: 16px; overflow: hidden; border: 1px solid var(--sv-border); }
+.sv2-player-embed iframe { display: block; border: 0; }
+.sv2-miniplayer { position: fixed; left: 50%; bottom: 18px; transform: translateX(-50%); z-index: 50; display: flex; align-items: center; gap: 10px; padding: 11px 18px; border-radius: 999px; border: 1px solid var(--sv-border); background: var(--sv-surface); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px); color: var(--sv-text); cursor: pointer; font-family: inherit; box-shadow: 0 10px 36px rgba(0,0,0,.3); }
+.sv2-miniplayer .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--sv-accent); animation: sv2Pulse 1.6s infinite; }
+@keyframes sv2Pulse { 0%,100% { opacity: 1 } 50% { opacity: .35 } }
+.sv2-miniplayer .t { font-size: 12.5px; font-weight: 600; }
+
+/* Bana yaz + footer */
+.sv2-contact h2 { font-size: 15px; font-weight: 700; margin: 0 2px 10px; }
+.sv2-form { padding: 16px; display: flex; flex-direction: column; gap: 10px; }
+.sv2-form input, .sv2-form textarea { width: 100%; padding: 11px 13px; border-radius: 12px; border: 1px solid var(--sv-border); background: transparent; color: var(--sv-text); font-family: inherit; font-size: 14px; outline: none; }
+.sv2-form input::placeholder, .sv2-form textarea::placeholder { color: var(--sv-muted); }
+.sv2-form input:focus, .sv2-form textarea:focus { border-color: var(--sv-accent); }
+.sv2-form button { padding: 12px; border: 0; border-radius: 12px; background: var(--sv-accent); color: var(--sv-ink); font-weight: 700; font-size: 14px; cursor: pointer; font-family: inherit; }
+.sv2-form button:disabled { opacity: .6; }
+.sv2-form .err { color: #ff6b6b; font-size: 12.5px; }
+.sv2-thanks { padding: 22px; text-align: center; font-size: 15px; font-weight: 600; }
+.sv2-footer { text-align: center; padding: 22px 0 6px; color: var(--sv-muted); font-size: 12px; opacity: .7; }
+
+@media (prefers-reduced-motion: reduce) {
+  .sv2-name span, .sv2-story, .sv2-music .eq i, .sv2-miniplayer .dot { animation: none !important; }
+}

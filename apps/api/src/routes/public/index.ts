@@ -179,6 +179,24 @@ publicRouter.post('/:slug/event', async (req, res, next) => {
   }
 })
 
+// GET /p/:slug/reactions — sosyal sayfa tepki (🔥) sayacı
+publicRouter.get('/:slug/reactions', async (req, res, next) => {
+  try {
+    const profile = await prisma.profile.findUnique({
+      where: { slug: req.params.slug },
+      select: { id: true, isPublished: true },
+    })
+    if (!profile || !profile.isPublished) {
+      res.json({ success: true, data: { count: 0 } })
+      return
+    }
+    const count = await prisma.analyticsEvent.count({
+      where: { profileId: profile.id, eventType: 'BUTTON_CLICK', buttonLabel: 'reaction' },
+    })
+    res.json({ success: true, data: { count } })
+  } catch (err) { next(err) }
+})
+
 // POST /p/:slug/lead — lead capture formu
 publicRouter.post('/:slug/lead', leadLimiter, async (req, res, next) => {
   try {

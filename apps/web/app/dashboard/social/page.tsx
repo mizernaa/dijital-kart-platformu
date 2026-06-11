@@ -37,21 +37,33 @@ function SocialPreview({ data, displayName, avatarUrl, slug }: { data: SocialDat
       <div className="mx-auto rounded-[2rem] p-2 shadow-2xl" style={{ maxWidth: 280, background: '#0b0b0c', border: '1px solid #27272a' }}>
         <div className="rounded-[1.5rem] overflow-hidden relative" style={{ background: st.background, color: st.vibe.text, fontFamily: `'${st.font}', sans-serif`, height: 520, overflowY: 'auto' }}>
           <div style={{ padding: 16, display: 'flex', flexDirection: 'column', gap: 12 }}>
-            {/* hero */}
-            <div style={{ background: surface, border: `1px solid ${border}`, borderRadius: 20, padding: 18, textAlign: 'center', backdropFilter: 'blur(10px)' }}>
-              {data.cover && <div style={{ height: 64, margin: '-18px -18px 0', backgroundImage: `url(${imgUrl(data.cover)})`, backgroundSize: 'cover', backgroundPosition: 'center', borderRadius: '20px 20px 0 0' }} />}
-              <div style={{ width: 76, height: 76, margin: `${data.cover ? '-30px' : '4px'} auto 8px`, borderRadius: avatarRadius, clipPath: avatarClip, background: `linear-gradient(135deg, ${st.accent}, rgba(0,0,0,.2))`, color: ink, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 30, fontWeight: 800, border: `3px solid ${surface}`, overflow: 'hidden', position: 'relative', boxShadow: data.effects.glow ? `0 0 24px ${st.accent}` : 'none' }}>
-                {avatarUrl ? <img src={imgUrl(avatarUrl)} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : (displayName || handle).charAt(0).toUpperCase()}
+            {/* poster hero (Bento Sahne) */}
+            <div style={{ position: 'relative', margin: '-16px -16px 0', height: 170, overflow: 'hidden', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}>
+              <div style={{ position: 'absolute', inset: 0, backgroundSize: 'cover', backgroundPosition: 'center 30%', background: (imgUrl(data.cover) || imgUrl(avatarUrl)) ? `linear-gradient(180deg, rgba(0,0,0,.1) 30%, rgba(0,0,0,.55)), url(${imgUrl(data.cover) || imgUrl(avatarUrl)}) center/cover` : `linear-gradient(160deg, ${st.accent}88, ${st.vibe.gradient[1]})` }} />
+              <span style={{ position: 'absolute', top: 10, left: 12, zIndex: 2, fontSize: 10, fontWeight: 700, color: '#fff', background: 'rgba(0,0,0,.35)', padding: '3px 9px', borderRadius: 999 }}>@{handle}</span>
+              {data.location && <span style={{ position: 'absolute', top: 10, right: 12, zIndex: 2, fontSize: 9.5, color: '#fff', background: 'rgba(0,0,0,.35)', padding: '3px 8px', borderRadius: 999 }}>📍 {data.location}</span>}
+              <div style={{ position: 'relative', zIndex: 2, padding: '0 12px 4px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '-0.04em', lineHeight: 0.9, fontSize: 30, color: '#fff' }}>
+                {(displayName || handle).split(/\s+/).map((w, i) => <span key={i} style={{ display: 'block', color: i === 1 ? st.accent : '#fff' }}>{w}</span>)}
               </div>
-              <div style={{ fontSize: 17, fontWeight: 800 }}>{displayName || handle}</div>
-              <div style={{ fontSize: 12, color: st.accent, fontWeight: 600 }}>@{handle}</div>
-              {data.status && <div style={{ fontSize: 12, marginTop: 6, opacity: .9 }}>{data.status}</div>}
-              {(data.bio) && <div style={{ fontSize: 11.5, marginTop: 6, color: st.vibe.muted, lineHeight: 1.5 }}>{data.bio}</div>}
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5, justifyContent: 'center', marginTop: 10 }}>
-                {data.location && <span style={{ fontSize: 10.5, padding: '4px 9px', borderRadius: 999, background: border, fontWeight: 600 }}>📍 {data.location}</span>}
-                {data.show.interests && data.interests.slice(0, 5).map((t, i) => <span key={i} style={{ fontSize: 10.5, padding: '4px 9px', borderRadius: 999, background: border, fontWeight: 600 }}>{t}</span>)}
-              </div>
+              {data.status && <span style={{ position: 'relative', zIndex: 2, alignSelf: 'flex-start', margin: '6px 12px 10px', fontSize: 10, fontWeight: 700, color: st.accent, background: 'rgba(0,0,0,.35)', border: `1px solid ${st.accent}66`, padding: '3px 9px', borderRadius: 999 }}>{data.status}</span>}
             </div>
+            {(data.bio || (data.show.interests && data.interests.length > 0)) && (
+              <div style={{ padding: '0 2px' }}>
+                {data.bio && <div style={{ fontSize: 11, color: st.vibe.muted, lineHeight: 1.5 }}>{data.bio}</div>}
+                {data.show.interests && data.interests.length > 0 && (
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5, marginTop: 6 }}>
+                    {data.interests.slice(0, 5).map((t, i) => <span key={i} style={{ fontSize: 10, padding: '3px 9px', borderRadius: 999, background: border, fontWeight: 600 }}>{t}</span>)}
+                  </div>
+                )}
+              </div>
+            )}
+            {/* anlar şeridi */}
+            {data.show.gallery && data.gallery.length > 0 && (
+              <div style={{ display: 'flex', gap: 7, overflow: 'hidden' }}>
+                {data.gallery.slice(0, 5).map(g => <div key={g.id} style={{ width: 42, height: 42, flexShrink: 0, borderRadius: '50%', border: `2px solid ${st.accent}`, padding: 2 }}><img src={imgUrl(g.url)} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} /></div>)}
+                <span style={{ fontSize: 9, color: st.vibe.muted, alignSelf: 'center', marginLeft: 'auto' }}>anlar</span>
+              </div>
+            )}
             {/* links */}
             {data.show.links && data.links.map(l => (
               <div key={l.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: 12, borderRadius: 14, background: linkBg, border: linkBorder }}>
@@ -355,7 +367,7 @@ export default function SocialPage() {
         <div className="card p-5">
           <h2 className="font-semibold text-gray-900 mb-3">Bölüm Görünürlüğü</h2>
           <div className="grid grid-cols-2 gap-2">
-            {([['links', 'Linkler'], ['socials', 'Sosyal ikonlar'], ['gallery', 'Galeri'], ['posts', 'Notlar'], ['music', 'Müzik'], ['interests', 'İlgi alanları'], ['contactForm', 'Bana Yaz formu']] as const).map(([k, lbl]) => (
+            {([['links', 'Linkler'], ['socials', 'Sosyal ikonlar'], ['gallery', 'Anlar (galeri)'], ['posts', 'Notlar'], ['music', 'Müzik'], ['interests', 'İlgi alanları'], ['reaction', 'Tepki sayacı (🔥)'], ['contactForm', 'Bana Yaz formu']] as const).map(([k, lbl]) => (
               <label key={k} className="flex items-center justify-between p-2.5 rounded-lg bg-gray-50 text-sm">
                 <span className="text-gray-700">{lbl}</span>
                 <input type="checkbox" checked={data.show[k]} onChange={e => patch({ show: { ...data.show, [k]: e.target.checked } })} />
