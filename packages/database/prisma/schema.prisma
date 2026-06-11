@@ -209,6 +209,7 @@ model Profile {
   // Genişletilmiş profil alanları
   location           String? // "İstanbul, Türkiye"
   tagline            String? // Tek cümlelik motto
+  tickerText         String? // Signature kayan şerit — virgülle ayrılmış kelimeler
   available          Boolean @default(false) // Yeni projelere açık
   calendarUrl        String? // Calendly / cal.com linki
   stats              String? // JSON: [{value:"10+",label:"Yıl Deneyim"}]

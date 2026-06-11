@@ -38,8 +38,8 @@
 
 .sig-root main{position:relative;z-index:1}
 .sig-root .frame{max-width:680px;margin:0 auto;padding:0 24px}
-.sig-root .lbl{font-size:11px;letter-spacing:.45em;color:var(--gold);text-transform:uppercase;font-weight:600}
-.sig-root .idx{font-family:"Space Grotesk";font-size:12px;color:var(--dim);letter-spacing:.2em}
+.sig-root .lbl{font-size:12.5px;letter-spacing:.3em;color:var(--gold);text-transform:uppercase;font-weight:600}
+.sig-root .idx{font-family:"Space Grotesk";font-size:13px;color:var(--mut);letter-spacing:.2em}
 
 .sig-root [data-r]{opacity:0;transform:translateY(46px);transition:opacity 1s var(--ease),transform 1s var(--ease)}
 .sig-root [data-r].in{opacity:1;transform:none}
@@ -61,11 +61,11 @@
 .sig-root .act1-meta .who{font-size:14px;color:var(--mut);max-width:34ch;line-height:1.7}
 .sig-root .act1-meta .who b{color:var(--ink);font-weight:700}
 .sig-root .act1-meta .who em{color:var(--gold);font-style:normal}
-.sig-root .coords{text-align:right;font-size:11px;color:var(--dim);letter-spacing:.14em;line-height:2}
+.sig-root .coords{text-align:right;font-size:12px;color:var(--mut);letter-spacing:.14em;line-height:2}
 .sig-root .coords .live{color:#27c468;display:inline-flex;align-items:center;gap:6px}
 .sig-root .coords .live::before{content:"";width:6px;height:6px;border-radius:50%;background:#27c468;box-shadow:0 0 0 0 rgba(39,196,104,.5);animation:sigPing 2s infinite}
 @keyframes sigPing{70%{box-shadow:0 0 0 9px transparent}100%{box-shadow:0 0 0 0 transparent}}
-.sig-root .scrollcue{position:absolute;bottom:26px;left:50%;transform:translateX(-50%);font-size:10px;letter-spacing:.4em;color:var(--dim);writing-mode:vertical-rl;display:flex;align-items:center;gap:10px}
+.sig-root .scrollcue{position:absolute;bottom:26px;left:50%;transform:translateX(-50%);font-size:11px;letter-spacing:.3em;color:var(--mut);writing-mode:vertical-rl;display:flex;align-items:center;gap:10px}
 .sig-root .scrollcue::after{content:"";width:1px;height:44px;background:linear-gradient(var(--gold),transparent);animation:sigDrip 1.8s var(--ease) infinite}
 @keyframes sigDrip{from{transform:scaleY(0);transform-origin:top}50%{transform:scaleY(1);transform-origin:top}51%{transform-origin:bottom}to{transform:scaleY(0);transform-origin:bottom}}
 
@@ -87,7 +87,7 @@
 .sig-root .bn{background:var(--bg);padding:38px 26px;position:relative;overflow:hidden;transition:background .5s}
 .sig-root .bn:hover{background:var(--bg-2)}
 .sig-root .bn .v{font-family:"Space Grotesk";font-weight:700;font-size:clamp(40px,8vw,64px);letter-spacing:-.04em;color:var(--gold);line-height:1}
-.sig-root .bn .k{font-size:11px;letter-spacing:.3em;color:var(--dim);text-transform:uppercase;margin-top:12px}
+.sig-root .bn .k{font-size:12px;letter-spacing:.22em;color:var(--mut);text-transform:uppercase;margin-top:12px}
 .sig-root .bn::after{content:attr(data-n);position:absolute;right:-6px;bottom:-22px;font-family:"Space Grotesk";font-size:90px;font-weight:700;color:rgba(246,241,232,.025)}
 
 /* 04 işler */
@@ -98,7 +98,7 @@
 .sig-root .work .w-idx{font-family:"Space Grotesk";font-size:13px;color:var(--dim)}
 .sig-root .work h3{font-size:clamp(28px,6.4vw,48px);font-weight:600;letter-spacing:-.035em;line-height:1.05;transition:transform .6s var(--ease),color .4s}
 .sig-root .work:hover h3{transform:translateX(16px);color:var(--gold)}
-.sig-root .work .w-cat{font-size:11px;letter-spacing:.3em;color:var(--dim);text-transform:uppercase;margin-top:10px;transition:color .4s}
+.sig-root .work .w-cat{font-size:12px;letter-spacing:.22em;color:var(--mut);text-transform:uppercase;margin-top:10px;transition:color .4s}
 .sig-root .work:hover .w-cat{color:var(--mut)}
 .sig-root .work .w-desc{font-size:14px;color:var(--mut);max-width:46ch;margin-top:14px;line-height:1.75;max-height:0;opacity:0;overflow:hidden;transition:max-height .7s var(--ease),opacity .5s .1s}
 .sig-root .work:hover .w-desc{max-height:160px;opacity:1}
@@ -121,7 +121,7 @@
 /* 06 temas */
 .sig-root .act-6{padding:0 0 60px}
 .sig-root .contact-giant{display:block;text-align:center;padding:70px 0;position:relative;overflow:hidden}
-.sig-root .contact-giant .cg-lbl{font-size:11px;letter-spacing:.5em;color:var(--dim);text-transform:uppercase}
+.sig-root .contact-giant .cg-lbl{font-size:12.5px;letter-spacing:.32em;color:var(--mut);text-transform:uppercase}
 .sig-root .contact-giant .cg-main{font-family:"Space Grotesk";font-weight:700;text-transform:uppercase;font-size:clamp(40px,11vw,100px);letter-spacing:-.035em;line-height:1;margin-top:18px;transition:letter-spacing .8s var(--ease)}
 .sig-root .contact-giant:hover .cg-main{letter-spacing:.01em}
 .sig-root .contact-giant .cg-main .flip{display:inline-block;position:relative;color:var(--gold)}
@@ -145,13 +145,13 @@
 .sig-root .qr-frame::after{bottom:0;right:0;border-left:0;border-top:0}
 .sig-root .qr-frame:hover::before{top:-7px;left:-7px}
 .sig-root .qr-frame:hover::after{bottom:-7px;right:-7px}
-.sig-root .qr-cap{font-size:11px;letter-spacing:.3em;color:var(--dim);text-transform:uppercase;text-align:center}
+.sig-root .qr-cap{font-size:12px;letter-spacing:.22em;color:var(--mut);text-transform:uppercase;text-align:center}
 
 /* footer */
 .sig-root .endmark{padding:50px 0 60px;text-align:center;border-top:1px solid rgba(246,241,232,.07)}
 .sig-root .endmark .e-sig{font-family:"Space Grotesk";font-size:15px;letter-spacing:.3em;color:var(--mut)}
 .sig-root .endmark .e-sig b{color:var(--gold);font-weight:600}
-.sig-root .endmark .e-sub{font-size:10px;letter-spacing:.3em;color:var(--dim);margin-top:10px;text-transform:uppercase}
+.sig-root .endmark .e-sub{font-size:11px;letter-spacing:.24em;color:var(--mut);margin-top:10px;text-transform:uppercase}
 .sig-root .socrow{display:flex;justify-content:center;gap:22px;margin-top:24px;flex-wrap:wrap}
 .sig-root .socrow a svg{width:17px;height:17px;color:var(--dim);transition:all .4s var(--ease)}
 .sig-root .socrow a:hover svg{color:var(--gold);transform:translateY(-4px)}

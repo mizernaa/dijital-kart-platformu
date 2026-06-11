@@ -69,7 +69,7 @@ export default function ProfilePage() {
 
   // Genişletilmiş kimlik
   const [extended, setExtended] = useState({
-    location: '', tagline: '', available: false, calendarUrl: '',
+    location: '', tagline: '', tickerText: '', available: false, calendarUrl: '',
   })
   const [stats, setStats] = useState<{ value: string; label: string }[]>([])
   const [newStat, setNewStat] = useState({ value: '', label: '' })
@@ -124,7 +124,7 @@ export default function ProfilePage() {
         showCvSection: p.showCvSection || false,
       })
       setExtended({
-        location: p.location || '', tagline: p.tagline || '',
+        location: p.location || '', tagline: p.tagline || '', tickerText: p.tickerText || '',
         available: p.available || false, calendarUrl: p.calendarUrl || '',
       })
       setStats(parseJson(p.stats, []))
@@ -166,7 +166,7 @@ export default function ProfilePage() {
 
   const saveExtended = async () => {
     await api.put('/customer/profile', {
-      location: extended.location || null, tagline: extended.tagline || null,
+      location: extended.location || null, tagline: extended.tagline || null, tickerText: extended.tickerText || null,
       available: extended.available,
       calendarUrl: extended.calendarUrl || null,
       stats: JSON.stringify(stats), services: JSON.stringify(services),
@@ -399,6 +399,11 @@ export default function ProfilePage() {
             <h2 className="font-semibold text-gray-900 pb-2 border-b border-gray-100">Kişisel Kimlik</h2>
             <div><label className="label">Konum</label><input className="input" value={extended.location} onChange={e => setExtended(x => ({ ...x, location: e.target.value }))} placeholder="İstanbul, Türkiye" /></div>
             <div><label className="label">Motto / Tagline</label><input className="input" value={extended.tagline} onChange={e => setExtended(x => ({ ...x, tagline: e.target.value }))} placeholder="Fikirleri ürüne dönüştürüyorum." maxLength={160} /></div>
+            <div>
+              <label className="label">Kayan Şerit Kelimeleri</label>
+              <input className="input" value={extended.tickerText} onChange={e => setExtended(x => ({ ...x, tickerText: e.target.value }))} placeholder="Ürün Tasarımı, SaaS, Marka Kimliği, Danışmanlık" maxLength={300} />
+              <p className="text-xs text-gray-400 mt-1">Public sayfadaki büyük kayan şeritte dönen kelimeler — virgülle ayır. Boş bırakılırsa hizmet başlıkların kullanılır.</p>
+            </div>
             <div><label className="label">Takvim / Randevu Linki</label><input className="input" value={extended.calendarUrl} onChange={e => setExtended(x => ({ ...x, calendarUrl: e.target.value }))} placeholder="https://cal.com/kullanici" /></div>
             <div className="flex items-center justify-between">
               <div><p className="text-sm font-medium text-gray-700">Yeni Projelere Açık</p><p className="text-xs text-gray-400">Profilinizde "Müsait" rozeti gösterir</p></div>

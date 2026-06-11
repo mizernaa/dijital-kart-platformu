@@ -132,6 +132,7 @@ export interface ProfileDetail {
   accentColor: string | null
   profileMode: string
   socialData: string | null
+  tickerText: string | null
   fontFamily: string
   buttonStyle: ButtonStyle
   profileShape: ProfileShape

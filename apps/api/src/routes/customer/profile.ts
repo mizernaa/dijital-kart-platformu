@@ -97,6 +97,7 @@ profileRouter.put('/', async (req, res, next) => {
       typographyDensity: z.enum(['compact', 'standard', 'spacious']).optional(),
       // Public mod + sosyal içerik
       profileMode: z.enum(['BUSINESS', 'SOCIAL']).optional(),
+      tickerText: z.string().max(300).optional().nullable(),
       socialData: z.string().max(120000).optional().nullable()
         .refine(v => v == null || (() => { try { JSON.parse(v); return true } catch { return false } })(), 'Geçersiz sosyal veri.'),
     })

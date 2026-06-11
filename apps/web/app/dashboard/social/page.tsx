@@ -36,7 +36,29 @@ function SocialPreview({ data, displayName, avatarUrl, slug }: { data: SocialDat
       <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3 text-center">Canlı Önizleme</p>
       <div className="mx-auto rounded-[2rem] p-2 shadow-2xl" style={{ maxWidth: 280, background: '#0b0b0c', border: '1px solid #27272a' }}>
         <div className="rounded-[1.5rem] overflow-hidden relative" style={{ background: st.background, color: st.vibe.text, fontFamily: `'${st.font}', sans-serif`, height: 520, overflowY: 'auto' }}>
-          <div style={{ padding: 16, display: 'flex', flexDirection: 'column', gap: 12 }}>
+          {/* Animasyonlu arka plan göstergesi (public sayfadaki efektin küçük temsili) */}
+          {st.animated !== 'none' && (
+            <>
+              <style>{`@keyframes pvFloatA{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(18px,12px) scale(1.15)}}@keyframes pvFloatB{0%,100%{transform:translate(0,0)}50%{transform:translate(-14px,-10px)}}@keyframes pvRise{0%{transform:translateY(0);opacity:0}15%{opacity:.7}100%{transform:translateY(-500px);opacity:0}}@keyframes pvFlow{0%{background-position:0% 0%}100%{background-position:200% 200%}}`}</style>
+              {(st.animated === 'aurora') && (
+                <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', overflow: 'hidden' }}>
+                  <i style={{ position: 'absolute', top: -60, left: -50, width: 190, height: 190, borderRadius: '50%', filter: 'blur(38px)', opacity: .55, background: `radial-gradient(circle, ${st.accent}, transparent 62%)`, animation: 'pvFloatA 7s ease-in-out infinite' }} />
+                  <i style={{ position: 'absolute', bottom: -60, right: -50, width: 170, height: 170, borderRadius: '50%', filter: 'blur(38px)', opacity: .4, background: 'radial-gradient(circle, #6f7bff, transparent 62%)', animation: 'pvFloatB 9s ease-in-out infinite' }} />
+                </div>
+              )}
+              {(st.animated === 'flow') && (
+                <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', background: 'linear-gradient(120deg, transparent, rgba(255,255,255,.16), transparent)', backgroundSize: '200% 200%', animation: 'pvFlow 5s linear infinite', mixBlendMode: 'overlay' }} />
+              )}
+              {(st.animated === 'particles') && (
+                <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', overflow: 'hidden' }}>
+                  {[12, 34, 58, 76, 90].map((x, i) => (
+                    <i key={i} style={{ position: 'absolute', bottom: -8, left: `${x}%`, width: 5, height: 5, borderRadius: '50%', background: st.accent, animation: `pvRise ${4 + i}s linear infinite`, animationDelay: `${i * 0.8}s` }} />
+                  ))}
+                </div>
+              )}
+            </>
+          )}
+          <div style={{ position: 'relative', zIndex: 1, padding: 16, display: 'flex', flexDirection: 'column', gap: 12 }}>
             {/* poster hero (Bento Sahne) */}
             <div style={{ position: 'relative', margin: '-16px -16px 0', height: 170, overflow: 'hidden', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}>
               <div style={{ position: 'absolute', inset: 0, backgroundSize: 'cover', backgroundPosition: 'center 30%', background: (imgUrl(data.cover) || imgUrl(avatarUrl)) ? `linear-gradient(180deg, rgba(0,0,0,.1) 30%, rgba(0,0,0,.55)), url(${imgUrl(data.cover) || imgUrl(avatarUrl)}) center/cover` : `linear-gradient(160deg, ${st.accent}88, ${st.vibe.gradient[1]})` }} />
@@ -163,7 +185,7 @@ export default function SocialPage() {
     <div className="flex gap-8 max-w-6xl">
       <div className="flex-1 min-w-0 space-y-4">
         {/* Başlık */}
-        <div className="flex items-center justify-between mb-2">
+        <div className="flex flex-wrap items-center justify-between gap-3 mb-2">
           <div>
             <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2"><Sparkles className="text-fuchsia-500" size={22} /> Sosyal Sayfa</h1>
             <p className="text-sm text-gray-500 mt-0.5">Kendini parlat: sosyal medya, galeri, blog ve daha fazlası.</p>
@@ -189,7 +211,7 @@ export default function SocialPage() {
         {/* Vibe & Arka Plan */}
         <div className="card p-5">
           <h2 className="font-semibold text-gray-900 mb-3">Vibe</h2>
-          <div className="grid grid-cols-4 gap-2.5 mb-5">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 mb-5">
             {SOCIAL_VIBES.map(v => (
               <button key={v.id} onClick={() => pickVibe(v.id)}
                 className={`relative rounded-xl border-2 overflow-hidden transition-all hover:scale-[1.03] ${data.vibe === v.id ? 'border-fuchsia-500 ring-2 ring-fuchsia-200' : 'border-transparent'}`}>
@@ -234,7 +256,7 @@ export default function SocialPage() {
         {/* Kimlik */}
         <div className="card p-5 space-y-3">
           <h2 className="font-semibold text-gray-900">Kimlik</h2>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <Field label="Kullanıcı adı (@handle)"><input className="input" value={data.handle} onChange={e => patch({ handle: e.target.value })} placeholder={slug} /></Field>
             <Field label="Konum"><input className="input" value={data.location} onChange={e => patch({ location: e.target.value })} placeholder="İstanbul" /></Field>
           </div>
@@ -247,7 +269,7 @@ export default function SocialPage() {
         {/* Görünüm */}
         <div className="card p-5 space-y-4">
           <h2 className="font-semibold text-gray-900">Görünüm</h2>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Field label="Vurgu rengi">
               <div className="flex items-center gap-2">
                 <input type="color" value={data.accent || st.accent} onChange={e => patch({ accent: e.target.value })} className="w-9 h-9 rounded cursor-pointer border border-gray-200" />
@@ -260,7 +282,7 @@ export default function SocialPage() {
               </select>
             </Field>
           </div>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Field label="Link stili">
               <div className="flex gap-2">
                 {LINK_STYLES.map(s => <button key={s.id} onClick={() => patch({ linkStyle: s.id as any })} className={`flex-1 py-2 text-xs font-medium border rounded-lg ${data.linkStyle === s.id ? 'border-fuchsia-500 bg-fuchsia-50 text-fuchsia-700' : 'border-gray-200 text-gray-600'}`}>{s.label}</button>)}
@@ -290,7 +312,7 @@ export default function SocialPage() {
           <div className="space-y-2">
             {data.links.length === 0 && <p className="text-sm text-gray-400">Henüz link yok. Instagram, YouTube, kişisel siten…</p>}
             {data.links.map((l, i) => (
-              <div key={l.id} className="flex items-center gap-2 p-2 rounded-lg bg-gray-50">
+              <div key={l.id} className="flex flex-wrap items-center gap-2 p-2 rounded-lg bg-gray-50">
                 <div className="flex flex-col">
                   <button onClick={() => i > 0 && patch({ links: swap(data.links, i, i - 1) })} className="text-gray-400 hover:text-gray-700"><ArrowUp size={13} /></button>
                   <button onClick={() => i < data.links.length - 1 && patch({ links: swap(data.links, i, i + 1) })} className="text-gray-400 hover:text-gray-700"><ArrowDown size={13} /></button>
@@ -350,13 +372,13 @@ export default function SocialPage() {
         {/* Müzik & İlgi */}
         <div className="card p-5 space-y-4">
           <h2 className="font-semibold text-gray-900 flex items-center gap-2"><Music size={16} /> Müzik & İlgi Alanları</h2>
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <Field label="Platform">
               <select className="input" value={data.music.type} onChange={e => patch({ music: { ...data.music, type: e.target.value as any } })}>
                 <option value="">Yok</option><option value="spotify">Spotify</option><option value="soundcloud">SoundCloud</option>
               </select>
             </Field>
-            <div className="col-span-2"><Field label="Bağlantı (URL)"><input className="input" value={data.music.url} onChange={e => patch({ music: { ...data.music, url: e.target.value } })} placeholder="https://open.spotify.com/..." /></Field></div>
+            <div className="sm:col-span-2"><Field label="Bağlantı (URL)"><input className="input" value={data.music.url} onChange={e => patch({ music: { ...data.music, url: e.target.value } })} placeholder="https://open.spotify.com/..." /></Field></div>
           </div>
           <Field label="İlgi alanları (virgülle ayır)">
             <input className="input" value={data.interests.join(', ')} onChange={e => patch({ interests: e.target.value.split(',').map(s => s.trim()).filter(Boolean) })} placeholder="müzik, kahve, oyun, seyahat" />
@@ -366,7 +388,7 @@ export default function SocialPage() {
         {/* Bölüm görünürlüğü */}
         <div className="card p-5">
           <h2 className="font-semibold text-gray-900 mb-3">Bölüm Görünürlüğü</h2>
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
             {([['links', 'Linkler'], ['socials', 'Sosyal ikonlar'], ['gallery', 'Anlar (galeri)'], ['posts', 'Notlar'], ['music', 'Müzik'], ['interests', 'İlgi alanları'], ['reaction', 'Tepki sayacı (🔥)'], ['contactForm', 'Bana Yaz formu']] as const).map(([k, lbl]) => (
               <label key={k} className="flex items-center justify-between p-2.5 rounded-lg bg-gray-50 text-sm">
                 <span className="text-gray-700">{lbl}</span>

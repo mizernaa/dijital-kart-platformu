@@ -10,6 +10,7 @@ interface SocialLink { id: string; platform: string; url: string; order: number 
 interface SigProfile {
   slug: string; displayName: string; title: string | null; bio: string | null
   tagline: string | null; location: string | null; available: boolean
+  tickerText: string | null
   avatarUrl: string | null; accentColor: string | null; calendarUrl: string | null
   companyName: string | null
   stats: string | null; services: string | null; projects: string | null; testimonials: string | null
@@ -78,7 +79,10 @@ export function SignatureView({ profile, slug, source }: { profile: SigProfile; 
   const line1 = nameParts[0] || profile.displayName || ''
   const line2 = nameParts.slice(1).join(' ')
 
-  const tickerItems = (services.length ? services.map(s => s.title) : skills.length ? skills : ['Dijital Kimlik', 'NFC', 'QR Kart'])
+  // Kullanıcının kendi şerit metni öncelikli; yoksa hizmetler → beceriler → varsayılan
+  const customTicker = (profile.tickerText || '').split(',').map(s => s.trim()).filter(Boolean)
+  const tickerItems = customTicker.length > 0 ? customTicker
+    : (services.length ? services.map(s => s.title) : skills.length ? skills : ['Dijital Kimlik', 'NFC', 'QR Kart'])
   const manifesto = profile.tagline || profile.bio || ''
   const vcardUrl = `${API}/p/${slug}/vcard`
   const profileUrl = `${PUBLIC_SITE}/u/${slug}`
@@ -253,7 +257,7 @@ export function SignatureView({ profile, slug, source }: { profile: SigProfile; 
         </section>
 
         {/* Şerit */}
-        {profile.showServicesSection && tickerItems.length > 0 && (
+        {(customTicker.length > 0 || profile.showServicesSection) && tickerItems.length > 0 && (
           <div className="ticker" data-r>
             <div className="ticker-track" id="sig-ticker">
               {tickerItems.map((t, i) => <span key={i} className={`t${i % 2 ? ' solid' : ''}`}>{t}</span>)}
