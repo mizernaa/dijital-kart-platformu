@@ -259,7 +259,7 @@ export default function ProfilePage() {
                   {avatarUrl ? 'Fotoğrafı Değiştir' : 'Fotoğraf Yükle'}
                 </button>
                 {avatarUrl && <button type="button" onClick={removeAvatar} className="block text-sm text-red-500 hover:text-red-700">Kaldır</button>}
-                <p className="text-xs text-gray-400">PNG, JPG — max 5MB</p>
+                <p className="text-xs text-gray-400">PNG, JPG, WebP — otomatik optimize edilir (kare/512px önerilir)</p>
               </div>
               <input ref={avatarInputRef} type="file" accept="image/*" className="hidden"
                 onChange={e => { if (e.target.files?.[0]) uploadAvatar(e.target.files[0]) }} />
@@ -340,7 +340,7 @@ export default function ProfilePage() {
               )}
               <div>
                 <button type="button" onClick={() => logoInputRef.current?.click()} className="btn-secondary text-sm">{companyLogoUrl ? 'Logoyu Değiştir' : 'Logo Yükle'}</button>
-                <p className="text-xs text-gray-400 mt-1">PNG, JPG — max 5MB</p>
+                <p className="text-xs text-gray-400 mt-1">PNG, JPG, WebP — otomatik optimize edilir (kare/512px önerilir)</p>
               </div>
               <input ref={logoInputRef} type="file" accept="image/*" className="hidden" onChange={e => { if (e.target.files?.[0]) uploadLogo(e.target.files[0]) }} />
             </div>

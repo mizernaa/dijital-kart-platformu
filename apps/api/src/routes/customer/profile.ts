@@ -1,32 +1,22 @@
 import { Router } from 'express'
 import { z } from 'zod'
 import multer from 'multer'
-import path from 'path'
 import { prisma } from '@dkp/database'
 import { AppError } from '../../middleware/errorHandler'
+import { processAndSaveImage } from '../../utils/imageProcessor'
 
 export const profileRouter = Router()
 
-// Sadece bilinen görsel tipleri; dosya adına uygun uzantı verilir
-// (uzantısız/serbest tipler tarayıcı sniffing riskini büyütür).
-const IMAGE_EXT: Record<string, string> = {
-  'image/jpeg': '.jpg',
-  'image/png': '.png',
-  'image/webp': '.webp',
-  'image/gif': '.gif',
-}
+// Sadece bilinen görsel tipleri kabul edilir; hepsi yüklenince WebP'e
+// çevrilip orantılı küçültülür (bkz. utils/imageProcessor).
+const ALLOWED_MIME = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/gif'])
 
+// Dosya RAM'de tutulur, sharp ile işlenip diske yazılır.
 const upload = multer({
-  storage: multer.diskStorage({
-    destination: path.join(process.cwd(), 'uploads'),
-    filename(_req, file, cb) {
-      const ext = IMAGE_EXT[file.mimetype] || '.bin'
-      cb(null, `${Date.now()}-${Math.random().toString(36).slice(2, 10)}${ext}`)
-    },
-  }),
-  limits: { fileSize: 5 * 1024 * 1024 },
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 10 * 1024 * 1024 },
   fileFilter(_req, file, cb) {
-    if (!IMAGE_EXT[file.mimetype]) {
+    if (!ALLOWED_MIME.has(file.mimetype)) {
       return cb(new Error('Sadece JPEG, PNG, WebP veya GIF yüklenebilir.'))
     }
     cb(null, true)
@@ -124,7 +114,8 @@ profileRouter.post('/avatar', upload.single('avatar'), async (req, res, next) =>
   try {
     if (!req.file) throw new AppError(400, 'Resim dosyası gerekli.')
 
-    const avatarUrl = `/uploads/${req.file.filename}`
+    const filename = await processAndSaveImage(req.file.buffer, req.file.mimetype, 'avatar')
+    const avatarUrl = `/uploads/${filename}`
 
     await prisma.profile.update({
       where: { userId: req.user!.userId },
@@ -141,7 +132,8 @@ profileRouter.post('/avatar', upload.single('avatar'), async (req, res, next) =>
 profileRouter.post('/image', upload.single('image'), async (req, res, next) => {
   try {
     if (!req.file) throw new AppError(400, 'Resim dosyası gerekli.')
-    const url = `/uploads/${req.file.filename}`
+    const filename = await processAndSaveImage(req.file.buffer, req.file.mimetype, 'general')
+    const url = `/uploads/${filename}`
     res.json({ success: true, data: { url } })
   } catch (err) {
     next(err)
@@ -152,7 +144,8 @@ profileRouter.post('/image', upload.single('image'), async (req, res, next) => {
 profileRouter.post('/company-logo', upload.single('logo'), async (req, res, next) => {
   try {
     if (!req.file) throw new AppError(400, 'Resim dosyası gerekli.')
-    const companyLogoUrl = `/uploads/${req.file.filename}`
+    const filename = await processAndSaveImage(req.file.buffer, req.file.mimetype, 'logo')
+    const companyLogoUrl = `/uploads/${filename}`
     await prisma.profile.update({
       where: { userId: req.user!.userId },
       data: { companyLogoUrl },
