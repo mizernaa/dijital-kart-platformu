@@ -88,11 +88,33 @@ export default function DashboardPage() {
   const [profile, setProfile] = useState<ProfileSummary | null>(null)
   const publicSiteUrl = process.env.NEXT_PUBLIC_PUBLIC_SITE_URL || 'http://localhost:3002'
 
+  const [strength, setStrength] = useState<{ score: number; steps: { ok: boolean; label: string; href: string }[] } | null>(null)
+
   useEffect(() => {
     setUser(getAuthUser())
-    api.get('/customer/profile').then(res => {
-      const d = res.data.data
+    Promise.all([
+      api.get('/customer/profile'),
+      api.get('/customer/profile/contacts').catch(() => ({ data: { data: [] } })),
+      api.get('/customer/profile/socials').catch(() => ({ data: { data: [] } })),
+    ]).then(([pRes, cRes, sRes]) => {
+      const d = pRes.data.data
       setProfile({ slug: d.slug, displayName: d.displayName, isPublished: d.isPublished, avatarUrl: d.avatarUrl })
+      const contacts = cRes.data.data?.length || 0
+      const socials = sRes.data.data?.length || 0
+      // Profil gücü skoru — eksik adımlar kullanıcıyı ilgili sayfaya yönlendirir
+      const steps = [
+        { ok: !!d.avatarUrl, w: 15, label: 'Profil fotoğrafı ekle', href: '/dashboard/profile' },
+        { ok: !!d.title, w: 10, label: 'Ünvanını yaz', href: '/dashboard/profile' },
+        { ok: !!d.bio, w: 15, label: 'Kısa bir tanıtım (bio) yaz', href: '/dashboard/profile' },
+        { ok: contacts >= 1, w: 15, label: 'En az 1 iletişim bilgisi ekle', href: '/dashboard/profile' },
+        { ok: socials >= 2, w: 15, label: 'En az 2 sosyal medya hesabı bağla', href: '/dashboard/profile' },
+        { ok: !!d.accentColor || d.theme !== 'minimal' || d.profileMode === 'SOCIAL', w: 10, label: 'Tasarımını kişiselleştir', href: '/dashboard/design' },
+        { ok: !!d.isPublished, w: 20, label: 'Profilini yayınla', href: '/dashboard/design' },
+      ]
+      setStrength({
+        score: steps.reduce((a, s) => a + (s.ok ? s.w : 0), 0),
+        steps: steps.filter(s => !s.ok).map(({ ok, label, href }) => ({ ok, label, href })),
+      })
     }).catch(console.error)
     api.get('/customer/analytics?days=30').then(res => {
       setAnalytics(res.data.data)
@@ -119,6 +141,34 @@ export default function DashboardPage() {
             </div>
           </div>
           <PublishButton slug={profile.slug} onPublished={() => setProfile(p => p ? { ...p, isPublished: true } : p)} />
+        </div>
+      )}
+
+      {/* ── Profil Gücü ─────────────────────────────────────────── */}
+      {strength && strength.score < 100 && (
+        <div className="card p-5">
+          <div className="flex items-center gap-4 mb-3">
+            <div className="relative w-14 h-14 flex-shrink-0">
+              <svg viewBox="0 0 36 36" className="w-14 h-14 -rotate-90">
+                <circle cx="18" cy="18" r="15.5" fill="none" stroke="#e5e7eb" strokeWidth="3.5" />
+                <circle cx="18" cy="18" r="15.5" fill="none" stroke={strength.score >= 70 ? '#22c55e' : strength.score >= 40 ? '#f59e0b' : '#ef4444'} strokeWidth="3.5"
+                  strokeDasharray={`${(strength.score / 100) * 97.4} 97.4`} strokeLinecap="round" />
+              </svg>
+              <span className="absolute inset-0 flex items-center justify-center text-sm font-bold text-gray-900">%{strength.score}</span>
+            </div>
+            <div>
+              <p className="font-semibold text-gray-900">Profil Gücü</p>
+              <p className="text-xs text-gray-500 mt-0.5">Dolu profiller {strength.score < 70 ? 'çok daha fazla' : 'daha fazla'} ziyaretçi etkileşimi alır. Kalan adımlar:</p>
+            </div>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {strength.steps.map(s => (
+              <Link key={s.label} href={s.href}
+                className="text-xs font-medium text-gray-700 bg-gray-50 hover:bg-blue-50 hover:text-blue-700 border border-gray-200 rounded-full px-3 py-1.5 transition-colors">
+                + {s.label}
+              </Link>
+            ))}
+          </div>
         </div>
       )}
 

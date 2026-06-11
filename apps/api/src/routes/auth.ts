@@ -1,11 +1,13 @@
 import { Router } from 'express'
 import { rateLimit } from 'express-rate-limit'
 import bcrypt from 'bcrypt'
+import crypto from 'crypto'
 import { z } from 'zod'
 import { prisma } from '@dkp/database'
 import { signAccessToken, signRefreshToken, verifyRefreshToken } from '../utils/jwt'
 import { verifyToken } from '../middleware/auth'
 import { AppError } from '../middleware/errorHandler'
+import { sendEmail, escapeHtml } from '../utils/email'
 
 export const authRouter = Router()
 
@@ -189,5 +191,60 @@ authRouter.post('/register', rateLimit({ windowMs: 60 * 60 * 1000, max: 5 }), as
         user: { id: user.id, username: user.username, role: user.role, passwordChanged: true },
       },
     })
+  } catch (err) { next(err) }
+})
+
+// POST /auth/forgot-password — sıfırlama linki gönder
+// Kullanıcı var/yok ayrımı sızdırılmaz (enumeration önlemi): her durumda success.
+authRouter.post('/forgot-password', rateLimit({ windowMs: 60 * 60 * 1000, max: 5 }), async (req, res, next) => {
+  try {
+    const body = z.object({ email: z.string().email() }).safeParse(req.body)
+    if (!body.success) throw new AppError(400, 'Geçerli bir e-posta girin.')
+
+    const user = await prisma.user.findFirst({ where: { email: body.data.email } })
+    if (user) {
+      const token = crypto.randomBytes(32).toString('hex')
+      await prisma.passwordResetToken.create({
+        data: { token, userId: user.id, expiresAt: new Date(Date.now() + 60 * 60 * 1000) },
+      })
+      const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000'
+      sendEmail({
+        to: user.email,
+        subject: 'Q·Kart şifre sıfırlama',
+        html: `<div style="font-family:sans-serif;max-width:520px;margin:0 auto;padding:24px">
+          <h2 style="color:#1e293b">Şifreni sıfırla</h2>
+          <p style="color:#475569">Merhaba ${escapeHtml(user.username)}, hesabın için şifre sıfırlama talebi aldık. Aşağıdaki bağlantı <strong>1 saat</strong> geçerlidir.</p>
+          <a href="${frontendUrl}/reset-password?token=${token}" style="display:inline-block;margin:14px 0;padding:12px 24px;background:#2563eb;color:#fff;text-decoration:none;border-radius:8px;font-weight:600">Yeni Şifre Belirle</a>
+          <p style="color:#94a3b8;font-size:13px">Bu talebi sen yapmadıysan bu e-postayı yok sayabilirsin; şifren değişmez.</p>
+        </div>`,
+      })
+    }
+    res.json({ success: true, message: 'E-posta kayıtlıysa sıfırlama bağlantısı gönderildi.' })
+  } catch (err) { next(err) }
+})
+
+// POST /auth/reset-password — token ile yeni şifre belirle
+authRouter.post('/reset-password', rateLimit({ windowMs: 15 * 60 * 1000, max: 10 }), async (req, res, next) => {
+  try {
+    const body = z.object({
+      token: z.string().min(32).max(128),
+      password: z.string().min(8, 'Şifre en az 8 karakter olmalı.'),
+    }).safeParse(req.body)
+    if (!body.success) throw new AppError(400, body.error.errors[0].message)
+
+    const reset = await prisma.passwordResetToken.findUnique({ where: { token: body.data.token } })
+    if (!reset || reset.usedAt || reset.expiresAt < new Date()) {
+      throw new AppError(400, 'Bağlantı geçersiz veya süresi dolmuş. Yeni bir sıfırlama isteyin.')
+    }
+
+    const passwordHash = await bcrypt.hash(body.data.password, 10)
+    await prisma.$transaction([
+      prisma.user.update({ where: { id: reset.userId }, data: { passwordHash, passwordChanged: true } }),
+      prisma.passwordResetToken.update({ where: { id: reset.id }, data: { usedAt: new Date() } }),
+      // Tüm oturumları sonlandır — eski refresh token'lar geçersiz
+      prisma.refreshToken.deleteMany({ where: { userId: reset.userId } }),
+    ])
+
+    res.json({ success: true, message: 'Şifren güncellendi. Yeni şifrenle giriş yapabilirsin.' })
   } catch (err) { next(err) }
 })

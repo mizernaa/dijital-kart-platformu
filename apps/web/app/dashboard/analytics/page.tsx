@@ -13,6 +13,7 @@ interface AnalyticsData {
   vcardDownloads: number
   leadCount: number
   sourceCounts: Record<string, number>
+  eventsByType: Record<string, number>
   dailyViews: { date: string; count: number }[]
   topButtons: { label: string; count: number }[]
   deviceBreakdown: { desktop: number; mobile: number; tablet: number; other: number }
@@ -116,6 +117,40 @@ export default function AnalyticsPage() {
         ))}
       </div>
 
+      {/* Dönüşüm hunisi */}
+      {data && data.totalViews > 0 && (() => {
+        const clicks = data.eventsByType?.BUTTON_CLICK || 0
+        const conversions = (data.vcardDownloads || 0) + (data.leadCount || 0)
+        const steps = [
+          { label: 'Görüntülenme', value: data.totalViews, color: 'bg-blue-500' },
+          { label: 'Buton Tıklama', value: clicks, color: 'bg-indigo-500' },
+          { label: 'Etkileşim (vCard + Mesaj)', value: conversions, color: 'bg-purple-500' },
+        ]
+        return (
+          <div className="card p-6 mb-4">
+            <h2 className="font-semibold text-gray-900 mb-1">Dönüşüm Hunisi</h2>
+            <p className="text-xs text-gray-400 mb-4">Ziyaretçi yolculuğu: görüntülemeden etkileşime</p>
+            <div className="space-y-3">
+              {steps.map((s, i) => {
+                const pct = data.totalViews ? Math.round((s.value / data.totalViews) * 100) : 0
+                return (
+                  <div key={s.label} className="flex items-center gap-3">
+                    <span className="text-xs text-gray-500 w-44 flex-shrink-0">{s.label}</span>
+                    <div className="flex-1 bg-gray-100 rounded-full h-6 overflow-hidden">
+                      <div className={`${s.color} h-full rounded-full flex items-center justify-end pr-2 transition-all duration-700`}
+                        style={{ width: `${Math.max(pct, s.value > 0 ? 7 : 0)}%` }}>
+                        {s.value > 0 && <span className="text-[11px] font-bold text-white">{s.value}</span>}
+                      </div>
+                    </div>
+                    <span className="text-xs font-semibold text-gray-700 w-12 text-right">%{i === 0 ? 100 : pct}</span>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        )
+      })()}
+
       {/* Günlük trend */}
       <div className="card p-6 mb-4">
         <h2 className="font-semibold text-gray-900 mb-4">Günlük Görüntülenme Trendi</h2>
@@ -212,18 +247,20 @@ export default function AnalyticsPage() {
 
         {/* En çok tıklanan butonlar */}
         <div className="card p-6">
-          <h2 className="font-semibold text-gray-900 mb-4">En Çok Tıklanan Butonlar</h2>
+          <h2 className="font-semibold text-gray-900 mb-1">En Çok Tıklanan Linkler</h2>
+          <p className="text-xs text-gray-400 mb-3">CTR = tık / görüntülenme</p>
           {data?.topButtons && data.topButtons.length > 0 ? (
             <div className="space-y-2">
               {data.topButtons.map(btn => (
                 <div key={btn.label} className="flex items-center justify-between">
-                  <span className="text-sm text-gray-700 truncate flex-1">{btn.label}</span>
+                  <span className="text-sm text-gray-700 truncate flex-1">{btn.label === 'reaction' ? '🔥 Tepki' : btn.label}</span>
                   <div className="flex items-center gap-2">
                     <div
                       className="h-2 bg-blue-400 rounded-full"
                       style={{ width: `${Math.max(8, (btn.count / data.topButtons[0].count) * 80)}px` }}
                     />
                     <span className="text-sm font-medium text-gray-900 w-6 text-right">{btn.count}</span>
+                    <span className="text-[11px] text-gray-400 w-12 text-right">{data.totalViews ? `%${Math.round((btn.count / data.totalViews) * 100)}` : '—'}</span>
                   </div>
                 </div>
               ))}

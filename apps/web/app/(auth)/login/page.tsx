@@ -120,7 +120,7 @@ export default function LoginPage() {
         </form>
 
         <p className="login-back" style={{ marginTop: 12 }}>
-          Hesabın yok mu? <a href="/register">Kayıt Ol</a>
+          Hesabın yok mu? <a href="/register">Kayıt Ol</a> · <a href="/forgot-password">Şifremi unuttum</a>
         </p>
         <p className="login-back">
           <a href="/">← Ana sayfaya dön</a>

@@ -5,6 +5,8 @@ import LogoMarquee from '@/components/landing/LogoMarquee'
 import HowItWorks from '@/components/landing/HowItWorks'
 import VideoShowcase from '@/components/landing/VideoShowcase'
 import Features from '@/components/landing/Features'
+import TwoFaces from '@/components/landing/TwoFaces'
+import Faq from '@/components/landing/Faq'
 import Persona from '@/components/landing/Persona'
 import Pricing from '@/components/landing/Pricing'
 import Testimonials from '@/components/landing/Testimonials'
@@ -21,9 +23,11 @@ export default function LandingPage() {
         <HowItWorks />
         <VideoShowcase />
         <Features />
+        <TwoFaces />
         <Persona />
         <Pricing />
         <Testimonials />
+        <Faq />
         <OrderForm />
       </main>
       <Footer />

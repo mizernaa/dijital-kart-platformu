@@ -137,6 +137,7 @@ model User {
   package         Package       @relation(fields: [packageId], references: [id])
   profile           Profile?
   refreshTokens     RefreshToken[]
+  passwordResetTokens PasswordResetToken[]
   nfcOrders         NfcOrder[]
   teamMembersOwned  TeamMember[]     @relation("TeamOwner")
   teamMemberOf      TeamMember[]     @relation("TeamMember")
@@ -156,6 +157,18 @@ model RefreshToken {
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   expiresAt DateTime
   createdAt DateTime @default(now())
+
+  @@index([userId])
+}
+
+model PasswordResetToken {
+  id        String    @id @default(cuid())
+  token     String    @unique
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
 
   @@index([userId])
 }
