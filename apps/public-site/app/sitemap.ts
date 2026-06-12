@@ -1,4 +1,5 @@
 import type { MetadataRoute } from 'next'
+import { BLOG_POSTS } from '@/lib/blogPosts'
 
 const SITE = process.env.NEXT_PUBLIC_PUBLIC_SITE_URL || 'https://qansvizit.com'
 const API = process.env.API_URL || 'http://localhost:3001'
@@ -9,6 +10,13 @@ export const revalidate = 3600
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const entries: MetadataRoute.Sitemap = [
     { url: SITE, lastModified: new Date(), changeFrequency: 'weekly', priority: 1 },
+    { url: `${SITE}/blog`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.8 },
+    ...BLOG_POSTS.map(p => ({
+      url: `${SITE}/blog/${p.slug}`,
+      lastModified: new Date(p.date),
+      changeFrequency: 'monthly' as const,
+      priority: 0.8,
+    })),
   ]
 
   try {

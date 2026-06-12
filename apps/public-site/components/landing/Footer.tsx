@@ -8,8 +8,8 @@ const FOOTER_LINKS = {
     { label: 'Sipariş Ver', href: '#siparis' },
   ],
   Şirket: [
+    { label: 'Blog', href: '/blog' },
     { label: 'Hakkımızda', href: '#' },
-    { label: 'Kariyer', href: '#' },
     { label: 'Referanslar', href: '#yorumlar' },
     { label: 'İletişim', href: '#' },
   ],

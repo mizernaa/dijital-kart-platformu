@@ -255,6 +255,47 @@
 .sig-root .sig-form-ok-msg{font-family:"Space Grotesk";font-size:20px;font-weight:600}
 .sig-root .sig-form-ok-sub{font-size:13px;color:var(--mut);margin-top:8px}
 
+/* ===== Bölüm başlığı: hayalet numara + etiket + çizgi ===== */
+.sig-root .sec-mark{display:flex;align-items:center;gap:16px;position:relative}
+.sig-root .sec-mark-no{font-family:"Space Grotesk";font-weight:700;font-size:54px;line-height:1;letter-spacing:-.02em;-webkit-text-stroke:1.5px var(--gold);-webkit-text-fill-color:transparent;color:transparent;opacity:.85;flex-shrink:0}
+.sig-root .sec-mark-lbl{font-size:12.5px;letter-spacing:.3em;color:var(--gold);text-transform:uppercase;font-weight:700;flex-shrink:0}
+.sig-root .sec-mark-line{flex:1;height:1px;background:linear-gradient(90deg,var(--gold-soft),transparent)}
+
+/* ===== Sosyal medya — öne çıkan kartlar ===== */
+.sig-root .act-social{padding:0 0 120px}
+.sig-root .soc-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+@media(max-width:480px){.sig-root .soc-grid{grid-template-columns:1fr}}
+.sig-root .soc-card{display:flex;align-items:center;gap:16px;padding:20px 22px;border:1px solid var(--sig-line,rgba(246,241,232,.12));border-radius:var(--sig-btn-r,16px);background:var(--bg-2);transition:transform .45s var(--ease),border-color .4s,background .4s;position:relative;overflow:hidden}
+.sig-root .soc-card::before{content:"";position:absolute;inset:0;background:linear-gradient(120deg,var(--gold-soft),transparent 60%);opacity:0;transition:opacity .4s}
+.sig-root .soc-card:hover{transform:translateY(-5px);border-color:var(--gold)}
+.sig-root .soc-card:hover::before{opacity:1}
+.sig-root .soc-ic{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;background:var(--gold-soft);flex-shrink:0;position:relative}
+.sig-root .soc-ic svg{width:21px;height:21px;color:var(--gold)}
+.sig-root .soc-name{font-family:"Space Grotesk";font-size:16px;font-weight:600;letter-spacing:.01em;position:relative}
+.sig-root .soc-arrow{margin-left:auto;font-size:18px;color:var(--dim);transition:color .4s,transform .45s var(--ease);position:relative}
+.sig-root .soc-card:hover .soc-arrow{color:var(--gold);transform:translate(3px,-3px)}
+
+/* ===== Vurgu üstü yazı kontrastı (açık temalar dahil) ===== */
+.sig-root .chan.solid{color:var(--gold-ink,#0a0805)}
+.sig-root .chan.solid svg{color:var(--gold-ink,#0a0805)}
+.sig-root .sig-co-pill.solid{color:var(--gold-ink,#0a0805)}
+.sig-root .sig-co-pill.solid:hover{color:var(--gold-ink,#0a0805)}
+.sig-root .sf-send{color:var(--gold-ink,#0a0805)}
+.sig-root ::selection{color:var(--gold-ink,#0a0805)}
+
+/* ===== Mobil: açılış içeriğini ortala (sola yapışma düzeltmesi) ===== */
+@media(max-width:640px){
+  .sig-root .frame{padding:0 20px}
+  .sig-root .act-1{text-align:center;align-items:center}
+  .sig-root .act1-meta{flex-direction:column;align-items:center;text-align:center;gap:16px}
+  .sig-root .act1-meta .who{max-width:100%}
+  .sig-root .coords{text-align:center}
+  .sig-root .sig-avatar-wrap{display:flex;justify-content:center}
+  .sig-root .giant-name{font-size:clamp(48px,17vw,90px)}
+  .sig-root .sec-mark-no{font-size:42px}
+  .sig-root .bignums{grid-template-columns:1fr}
+}
+
 /* açık temalarda sabit koyu-varsayımlı çizgileri yumuşat */
 .sig-root.sig-light .work,.sig-root.sig-light .work:last-of-type{border-color:rgba(0,0,0,.1)}
 .sig-root.sig-light .q-dot{background:rgba(0,0,0,.12)}

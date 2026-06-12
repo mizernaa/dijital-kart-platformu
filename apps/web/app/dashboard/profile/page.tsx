@@ -2,6 +2,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { api } from '@/lib/api'
+import { CropModal } from '@/components/CropModal'
 import {
   Plus, Trash2, Check, Building2, User, Contact, Upload, X,
   ToggleLeft, ToggleRight, Briefcase, Star, MapPin, Layers, GripVertical,
@@ -65,7 +66,7 @@ export default function ProfilePage() {
 
   const [company, setCompany] = useState({
     companyName: '', companyDescription: '', companyWebsite: '', companyIndustry: '',
-    companyPhone: '', companyAddress: '', showCompanySection: false,
+    companyPhone: '', companyEmail: '', companyAddress: '', showCompanySection: false,
   })
   const [companySocials, setCompanySocials] = useState<{ platform: string; url: string }[]>([])
   const [newCompanySocial, setNewCompanySocial] = useState({ platform: 'Instagram', url: '' })
@@ -128,7 +129,7 @@ export default function ProfilePage() {
       setCompany({
         companyName: p.companyName || '', companyDescription: p.companyDescription || '',
         companyWebsite: p.companyWebsite || '', companyIndustry: p.companyIndustry || '',
-        companyPhone: p.companyPhone || '', companyAddress: p.companyAddress || '',
+        companyPhone: p.companyPhone || '', companyEmail: p.companyEmail || '', companyAddress: p.companyAddress || '',
         showCompanySection: p.showCompanySection || false,
       })
       setCompanySocials(parseJson(p.companySocials, []))
@@ -168,7 +169,7 @@ export default function ProfilePage() {
     await api.put('/customer/profile', {
       companyName: company.companyName || null, companyDescription: company.companyDescription || null,
       companyWebsite: company.companyWebsite || null, companyIndustry: company.companyIndustry || null,
-      companyPhone: company.companyPhone || null, companyAddress: company.companyAddress || null,
+      companyPhone: company.companyPhone || null, companyEmail: company.companyEmail || null, companyAddress: company.companyAddress || null,
       companySocials: JSON.stringify(companySocials),
       showCompanySection: company.showCompanySection,
     }); flash()
@@ -206,6 +207,9 @@ export default function ProfilePage() {
     }); flash()
   }
 
+  // Kırpma modalı: seçilen dosya + hedef (avatar | logo)
+  const [cropState, setCropState] = useState<{ file: File; target: 'avatar' | 'logo' } | null>(null)
+
   const uploadAvatar = async (file: File) => {
     const form = new FormData(); form.append('avatar', file)
     const res = await api.post('/customer/profile/avatar', form, { headers: { 'Content-Type': 'multipart/form-data' } })
@@ -218,6 +222,13 @@ export default function ProfilePage() {
     setCompanyLogoUrl(res.data.data.companyLogoUrl)
   }
   const removeLogo = async () => { await api.put('/customer/profile', { companyLogoUrl: null }); setCompanyLogoUrl(null) }
+
+  const onCropDone = async (cropped: File) => {
+    const target = cropState?.target
+    setCropState(null)
+    if (target === 'avatar') await uploadAvatar(cropped)
+    else if (target === 'logo') await uploadLogo(cropped)
+  }
 
   const addContact = async () => {
     if (!newContact.value) return
@@ -279,7 +290,7 @@ export default function ProfilePage() {
                 <p className="text-xs text-gray-400">PNG, JPG, WebP — otomatik optimize edilir (kare/512px önerilir)</p>
               </div>
               <input ref={avatarInputRef} type="file" accept="image/*" className="hidden"
-                onChange={e => { if (e.target.files?.[0]) uploadAvatar(e.target.files[0]) }} />
+                onChange={e => { if (e.target.files?.[0]) { setCropState({ file: e.target.files[0], target: 'avatar' }); e.target.value = '' } }} />
             </div>
           </div>
 
@@ -359,7 +370,7 @@ export default function ProfilePage() {
                 <button type="button" onClick={() => logoInputRef.current?.click()} className="btn-secondary text-sm">{companyLogoUrl ? 'Logoyu Değiştir' : 'Logo Yükle'}</button>
                 <p className="text-xs text-gray-400 mt-1">PNG, JPG, WebP — otomatik optimize edilir (kare/512px önerilir)</p>
               </div>
-              <input ref={logoInputRef} type="file" accept="image/*" className="hidden" onChange={e => { if (e.target.files?.[0]) uploadLogo(e.target.files[0]) }} />
+              <input ref={logoInputRef} type="file" accept="image/*" className="hidden" onChange={e => { if (e.target.files?.[0]) { setCropState({ file: e.target.files[0], target: 'logo' }); e.target.value = '' } }} />
             </div>
           </div>
           <div><label className="label">Şirket Adı</label><input className="input" value={company.companyName} onChange={e => setCompany(c => ({ ...c, companyName: e.target.value }))} placeholder="Acme A.Ş." /></div>
@@ -368,8 +379,9 @@ export default function ProfilePage() {
           <div><label className="label">Web Sitesi</label><input className="input" value={company.companyWebsite} onChange={e => setCompany(c => ({ ...c, companyWebsite: e.target.value }))} placeholder="https://sirket.com" /></div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div><label className="label">Telefon</label><input className="input" value={company.companyPhone} onChange={e => setCompany(c => ({ ...c, companyPhone: e.target.value }))} placeholder="+90 212 000 00 00" /></div>
-            <div><label className="label">Adres</label><input className="input" value={company.companyAddress} onChange={e => setCompany(c => ({ ...c, companyAddress: e.target.value }))} placeholder="Mahalle, Cadde No, İlçe / İl" /></div>
+            <div><label className="label">Şirket E-postası</label><input className="input" type="email" value={company.companyEmail} onChange={e => setCompany(c => ({ ...c, companyEmail: e.target.value }))} placeholder="info@sirket.com" /></div>
           </div>
+          <div><label className="label">Adres</label><input className="input" value={company.companyAddress} onChange={e => setCompany(c => ({ ...c, companyAddress: e.target.value }))} placeholder="Mahalle, Cadde No, İlçe / İl" /></div>
           <div>
             <label className="label">Şirket Sosyal Medyası</label>
             <div className="space-y-2">
@@ -700,6 +712,17 @@ export default function ProfilePage() {
 
           <button onClick={saveSectionToggles} className="btn-primary w-full">Bölüm Ayarlarını Kaydet</button>
         </div>
+      )}
+
+      {/* Görsel kırpma modalı — avatar/logo seçilince açılır */}
+      {cropState && (
+        <CropModal
+          file={cropState.file}
+          aspect={1}
+          title={cropState.target === 'avatar' ? 'Profil Fotoğrafını Konumlandır' : 'Logoyu Konumlandır'}
+          onDone={onCropDone}
+          onCancel={() => setCropState(null)}
+        />
       )}
     </div>
   )

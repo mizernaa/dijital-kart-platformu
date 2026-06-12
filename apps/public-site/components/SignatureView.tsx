@@ -1,7 +1,7 @@
 'use client'
 import { useEffect, useRef, useState } from 'react'
 import { trackEvent } from '@/lib/api'
-import { getPalette, resolveAccent, hexToRgb } from '@/lib/themes'
+import { getPalette, resolveAccent, accentInk, hexToRgb } from '@/lib/themes'
 
 const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
 const PUBLIC_SITE = process.env.NEXT_PUBLIC_PUBLIC_SITE_URL || 'http://localhost:3002'
@@ -17,7 +17,7 @@ interface SigProfile {
   buttonStyle: string; profileShape: string
   companyName: string | null; companyLogoUrl: string | null; companyDescription: string | null
   companyWebsite: string | null; companyIndustry: string | null
-  companyPhone?: string | null; companyAddress?: string | null; companySocials?: string | null
+  companyPhone?: string | null; companyEmail?: string | null; companyAddress?: string | null; companySocials?: string | null
   showCompanySection: boolean
   cvSkills: string | null; cvLanguages: string | null; showCvSection: boolean
   stats: string | null; services: string | null; projects: string | null; testimonials: string | null
@@ -76,6 +76,17 @@ const SOCIAL_ICON: Record<string, JSX.Element> = {
 
 /* Dinamik bölüm numaralandırma için yardımcı */
 function two(n: number) { return String(n).padStart(2, '0') }
+
+/* Bölüm başlığı: büyük hayalet numara + altın etiket + uzayan çizgi */
+function SecHead({ n, label, mb = 0 }: { n: string; label: string; mb?: number }) {
+  return (
+    <div className="sec-mark" data-r style={mb ? { marginBottom: mb } : undefined}>
+      <span className="sec-mark-no" aria-hidden="true">{n}</span>
+      <span className="sec-mark-lbl">{label}</span>
+      <span className="sec-mark-line" aria-hidden="true" />
+    </div>
+  )
+}
 
 export function SignatureView({ profile, slug, source }: { profile: SigProfile; slug: string; source?: string }) {
   const root = useRef<HTMLDivElement>(null)
@@ -293,6 +304,17 @@ export function SignatureView({ profile, slug, source }: { profile: SigProfile; 
       icon: ICON[t] || ICON.CUSTOM, ext: !['PHONE', 'EMAIL'].includes(t),
     })
   })
+  // WhatsApp iletişim satırı yoksa şahsi telefondan otomatik türet —
+  // tıklanınca doğrudan WhatsApp sohbeti açılır.
+  const hasWa = profile.contacts.some(c => c.type.toUpperCase() === 'WHATSAPP')
+  const phoneContact = profile.contacts.find(c => c.type.toUpperCase() === 'PHONE')
+  if (!hasWa && phoneContact) {
+    channels.push({
+      key: 'wa-auto',
+      href: `https://wa.me/${phoneContact.value.replace(/\D/g, '').replace(/^0/, '90')}`,
+      label: 'WhatsApp', icon: ICON.WHATSAPP, ext: true,
+    })
+  }
   if (profile.calendarUrl) channels.push({ key: 'cal', href: profile.calendarUrl, label: 'Toplantı Ayarla', icon: ICON.CALENDAR, ext: true })
 
   const socials = (profile.socials || []).slice().sort((a, b) => a.order - b.order)
@@ -301,6 +323,7 @@ export function SignatureView({ profile, slug, source }: { profile: SigProfile; 
   const rootVars = {
     '--bg': pal.bg, '--bg-2': pal.bg2, '--ink': pal.text, '--mut': pal.muted, '--dim': pal.faint,
     '--gold': accent, '--gold-2': shadeHex(accent, -0.25), '--gold-soft': `rgba(${ar},${ag},${ab},.16)`,
+    '--gold-ink': accentInk(accent),
     '--sig-line': pal.line, '--sig-btn-r': btnRadius,
     '--sig-av-r': avatarRadius, '--sig-av-clip': avatarClip,
     fontFamily: bodyFont,
@@ -364,7 +387,7 @@ export function SignatureView({ profile, slug, source }: { profile: SigProfile; 
         {/* Manifesto */}
         {hasManifesto && (
           <section className="act-2 frame">
-            <div data-r><span className="idx">{num()}</span>&nbsp;&nbsp;<span className="lbl">Manifesto</span></div>
+            <SecHead n={num()} label="Manifesto" />
             <p className="manifesto" id="sig-manifesto" data-r>{manifesto}</p>
           </section>
         )}
@@ -372,7 +395,7 @@ export function SignatureView({ profile, slug, source }: { profile: SigProfile; 
         {/* Sayılar */}
         {hasStats && (
           <section className="act-3 frame">
-            <div data-r><span className="idx">{num()}</span>&nbsp;&nbsp;<span className="lbl">Rakamlarla</span></div>
+            <SecHead n={num()} label="Rakamlarla" />
             <div className="bignums" data-r id="sig-nums">
               {stats.slice(0, 4).map((s, i) => {
                 const n = splitNum(s.value)
@@ -390,7 +413,7 @@ export function SignatureView({ profile, slug, source }: { profile: SigProfile; 
         {/* Hizmetler */}
         {hasServices && (
           <section className="act-svc frame">
-            <div data-r style={{ marginBottom: 28 }}><span className="idx">{num()}</span>&nbsp;&nbsp;<span className="lbl">Hizmetler</span></div>
+            <SecHead n={num()} label="Hizmetler" mb={28} />
             <div className="svc-grid">
               {services.map((s, i) => (
                 <div className="svc-card" data-r key={i}>
@@ -409,7 +432,7 @@ export function SignatureView({ profile, slug, source }: { profile: SigProfile; 
         {/* İşler */}
         {hasProjects && (
           <section className="act-4 frame">
-            <div data-r style={{ marginBottom: 28 }}><span className="idx">{num()}</span>&nbsp;&nbsp;<span className="lbl">Seçili İşler</span></div>
+            <SecHead n={num()} label="Seçili İşler" mb={28} />
             {projects.map((p, i) => (
               <div className="work" data-r key={i}>
                 <span className="w-line" />
@@ -432,7 +455,7 @@ export function SignatureView({ profile, slug, source }: { profile: SigProfile; 
         {/* Söz */}
         {hasTesti && q && (
           <section className="act-5 frame">
-            <div data-r><span className="idx">{num()}</span>&nbsp;&nbsp;<span className="lbl">Dedikleri</span></div>
+            <SecHead n={num()} label="Dedikleri" />
             <blockquote className="colossal-quote" data-r>{q.quote}</blockquote>
             <div className="q-who" data-r><b>{q.name}</b>{q.company ? ` — ${q.company}` : q.role ? ` — ${q.role}` : ''}</div>
             {testimonials.length > 1 && (
@@ -448,7 +471,7 @@ export function SignatureView({ profile, slug, source }: { profile: SigProfile; 
         {/* Kariyer & Eğitim */}
         {hasCareer && (
           <section className="act-career frame">
-            <div data-r style={{ marginBottom: 30 }}><span className="idx">{num()}</span>&nbsp;&nbsp;<span className="lbl">Yolculuk</span></div>
+            <SecHead n={num()} label="Yolculuk" mb={30} />
             {experience.length > 0 && (
               <div className="sig-timeline" data-r>
                 <div className="sig-tl-line" />
@@ -480,7 +503,7 @@ export function SignatureView({ profile, slug, source }: { profile: SigProfile; 
         {/* Beceriler & Diller */}
         {hasSkills && (
           <section className="act-skills frame">
-            <div data-r style={{ marginBottom: 28 }}><span className="idx">{num()}</span>&nbsp;&nbsp;<span className="lbl">Beceriler</span></div>
+            <SecHead n={num()} label="Beceriler" mb={28} />
             {skills.length > 0 && (
               <div className="sig-pills" data-r>
                 {skills.map((s, i) => <span key={i} className="sig-pill">{s}</span>)}
@@ -498,7 +521,7 @@ export function SignatureView({ profile, slug, source }: { profile: SigProfile; 
         {/* Şirket */}
         {hasCompany && (
           <section className="act-company frame">
-            <div data-r style={{ marginBottom: 28 }}><span className="idx">{num()}</span>&nbsp;&nbsp;<span className="lbl">Şirket</span></div>
+            <SecHead n={num()} label="Şirket" mb={28} />
             <div className="sig-co" data-r>
               <div className="sig-co-head">
                 {profile.companyLogoUrl && (
@@ -512,11 +535,16 @@ export function SignatureView({ profile, slug, source }: { profile: SigProfile; 
                 </div>
               </div>
               {profile.companyDescription && <p className="sig-co-desc">{profile.companyDescription}</p>}
-              {(profile.companyPhone || profile.companyAddress) && (
+              {(profile.companyPhone || profile.companyEmail || profile.companyAddress) && (
                 <div className="sig-co-contact">
                   {profile.companyPhone && (
                     <a href={`tel:${profile.companyPhone.replace(/\s/g, '')}`} onClick={() => onClick('Şirket Tel')}>
                       {ICON.PHONE}<span>{profile.companyPhone}</span>
+                    </a>
+                  )}
+                  {profile.companyEmail && (
+                    <a href={`mailto:${profile.companyEmail}`} onClick={() => onClick('Şirket E-posta')}>
+                      {ICON.EMAIL}<span>{profile.companyEmail}</span>
                     </a>
                   )}
                   {profile.companyAddress && (
@@ -540,6 +568,23 @@ export function SignatureView({ profile, slug, source }: { profile: SigProfile; 
                   ))}
                 </div>
               )}
+            </div>
+          </section>
+        )}
+
+        {/* Sosyal Medya — öne çıkan büyük kartlar */}
+        {socials.length > 0 && (
+          <section className="act-social frame">
+            <SecHead n={num()} label="Sosyal Medya" mb={28} />
+            <div className="soc-grid" data-r>
+              {socials.map(s => (
+                <a key={s.id} className="soc-card" href={s.url.startsWith('http') ? s.url : `https://${s.url}`}
+                   target="_blank" rel="noopener noreferrer" onClick={() => onClick(s.platform)}>
+                  <span className="soc-ic">{SOCIAL_ICON[s.platform.toUpperCase()] || ICON.WEBSITE}</span>
+                  <span className="soc-name">{s.platform.charAt(0) + s.platform.slice(1).toLowerCase()}</span>
+                  <span className="soc-arrow" aria-hidden="true">↗</span>
+                </a>
+              ))}
             </div>
           </section>
         )}
@@ -577,7 +622,7 @@ export function SignatureView({ profile, slug, source }: { profile: SigProfile; 
         {/* Bana Yaz */}
         {profile.showContactForm && (
           <section className="act-form frame">
-            <div data-r style={{ marginBottom: 30 }}><span className="idx">{two(secNo + 1)}</span>&nbsp;&nbsp;<span className="lbl">Bana Yaz</span></div>
+            <SecHead n={two(secNo + 1)} label="Bana Yaz" mb={30} />
             {leadStatus === 'sent' ? (
               <div className="sig-form-ok" data-r>
                 <div className="sig-form-ok-mark">✓</div>
