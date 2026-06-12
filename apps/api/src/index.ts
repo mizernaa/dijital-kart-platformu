@@ -15,6 +15,9 @@ import { errorHandler } from './middleware/errorHandler'
 import { scheduleWeeklyReport } from './jobs/weeklyReport'
 
 const app = express()
+// Nginx reverse proxy arkasındayız: gerçek ziyaretçi IP'si X-Forwarded-For'dan
+// alınmalı; yoksa rate limit'ler herkesi tek IP (127.0.0.1) olarak sayar.
+app.set('trust proxy', 1)
 const PORT = process.env.API_PORT || 3001
 
 // CORS origin listesi — production + development fallback
