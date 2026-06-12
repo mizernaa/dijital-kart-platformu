@@ -60,6 +60,10 @@ profileRouter.put('/', async (req, res, next) => {
       companyDescription: z.string().max(500).optional().nullable(),
       companyWebsite: z.string().max(200).optional().nullable(),
       companyIndustry: z.string().max(100).optional().nullable(),
+      companyPhone: z.string().max(30).optional().nullable(),
+      companyAddress: z.string().max(300).optional().nullable(),
+      companySocials: z.string().max(4000).optional().nullable()
+        .refine(v => v == null || (() => { try { return Array.isArray(JSON.parse(v)) } catch { return false } })(), 'Geçersiz sosyal medya verisi.'),
       showCompanySection: z.boolean().optional(),
       // CV bölümü
       cvSkills: z.string().optional().nullable(),

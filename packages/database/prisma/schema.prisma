@@ -201,6 +201,9 @@ model Profile {
   companyDescription String?
   companyWebsite     String?
   companyIndustry    String?
+  companyPhone       String?
+  companyAddress     String?
+  companySocials     String? // JSON: [{platform,url}]
   showCompanySection Boolean @default(false)
   // CV / Hakkımda bölümü
   cvSkills           String? // JSON array: ["React","Node.js"]

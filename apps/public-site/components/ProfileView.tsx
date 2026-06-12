@@ -11,6 +11,7 @@ interface Profile {
   cardStyle: string; typographyDensity: string; isPublished: boolean
   companyName: string | null; companyLogoUrl: string | null; companyDescription: string | null
   companyWebsite: string | null; companyIndustry: string | null; showCompanySection: boolean
+  companyPhone?: string | null; companyAddress?: string | null; companySocials?: string | null
   cvSkills: string | null; cvLanguages: string | null; showCvSection: boolean
   location: string | null; tagline: string | null; available: boolean; calendarUrl: string | null
   stats: string | null; services: string | null; projects: string | null
@@ -689,6 +690,37 @@ export function ProfileView({ profile, slug, source }: { profile: Profile; slug:
               <TiltCard className="company-card">
                 <div className="co-name">{profile.companyName}</div>
                 {profile.companyDescription && <div className="co-desc">{profile.companyDescription}</div>}
+                {(profile.companyPhone || profile.companyAddress) && (
+                  <div className="co-contact">
+                    {profile.companyPhone && (
+                      <a href={`tel:${profile.companyPhone.replace(/\s/g, '')}`} className="co-contact-row">
+                        <span className="co-contact-label">Tel</span>{profile.companyPhone}
+                      </a>
+                    )}
+                    {profile.companyAddress && (
+                      <a
+                        href={`https://maps.google.com/?q=${encodeURIComponent(profile.companyAddress)}`}
+                        target="_blank" rel="noopener noreferrer" className="co-contact-row"
+                      >
+                        <span className="co-contact-label">Adres</span>{profile.companyAddress}
+                      </a>
+                    )}
+                  </div>
+                )}
+                {(() => {
+                  let socials: { platform: string; url: string }[] = []
+                  try { socials = JSON.parse(profile.companySocials || '[]') } catch {}
+                  if (!Array.isArray(socials) || socials.length === 0) return null
+                  return (
+                    <div className="co-socials">
+                      {socials.filter(s => s?.url).map((s, i) => (
+                        <a key={i} href={s.url} target="_blank" rel="noopener noreferrer" className="co-social-pill">
+                          {s.platform}
+                        </a>
+                      ))}
+                    </div>
+                  )
+                })()}
                 {profile.companyWebsite && (
                   <a href={profile.companyWebsite} target="_blank" rel="noopener noreferrer" className="co-link">
                     Web Sitesini Ziyaret Et {IC.ext}

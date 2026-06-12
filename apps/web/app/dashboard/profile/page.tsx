@@ -4,7 +4,7 @@ import { useForm } from 'react-hook-form'
 import { api } from '@/lib/api'
 import {
   Plus, Trash2, Check, Building2, User, Contact, Upload, X,
-  ToggleLeft, ToggleRight, Briefcase, Star, MapPin, Layers,
+  ToggleLeft, ToggleRight, Briefcase, Star, MapPin, Layers, GripVertical,
 } from 'lucide-react'
 
 interface ContactItem { id: string; type: string; value: string; label: string | null; order: number }
@@ -44,6 +44,14 @@ function parseJson<T>(val: string | null, fallback: T): T {
   try { return JSON.parse(val) } catch { return fallback }
 }
 
+// Dizide elemanı from'dan to'ya taşır (sürükle-bırak sıralama için).
+function arrayMove<T>(arr: T[], from: number, to: number): T[] {
+  const copy = [...arr]
+  const [item] = copy.splice(from, 1)
+  copy.splice(to, 0, item)
+  return copy
+}
+
 export default function ProfilePage() {
   const [tab, setTab] = useState('profile')
   const [contacts, setContacts] = useState<ContactItem[]>([])
@@ -56,8 +64,11 @@ export default function ProfilePage() {
   const [newSocial, setNewSocial] = useState({ platform: 'INSTAGRAM', url: '' })
 
   const [company, setCompany] = useState({
-    companyName: '', companyDescription: '', companyWebsite: '', companyIndustry: '', showCompanySection: false,
+    companyName: '', companyDescription: '', companyWebsite: '', companyIndustry: '',
+    companyPhone: '', companyAddress: '', showCompanySection: false,
   })
+  const [companySocials, setCompanySocials] = useState<{ platform: string; url: string }[]>([])
+  const [newCompanySocial, setNewCompanySocial] = useState({ platform: 'Instagram', url: '' })
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null)
   const avatarInputRef = useRef<HTMLInputElement>(null)
   const [companyLogoUrl, setCompanyLogoUrl] = useState<string | null>(null)
@@ -81,6 +92,8 @@ export default function ProfilePage() {
   const [newProject, setNewProject] = useState({ title: '', category: '', desc: '', tags: '', color: '#d4a843' })
 
   // Referanslar
+  // Sürükle-bırak sıralama: hangi listeden hangi satırın taşındığı
+  const dragInfo = useRef<{ list: string; index: number } | null>(null)
   const [testimonials, setTestimonials] = useState<{ quote: string; name: string; role: string; company: string; initials: string }[]>([])
   const [newTesti, setNewTesti] = useState({ quote: '', name: '', role: '', company: '', initials: '' })
   const [experience, setExperience] = useState<{ year: string; role: string; company: string; desc: string }[]>([])
@@ -115,8 +128,10 @@ export default function ProfilePage() {
       setCompany({
         companyName: p.companyName || '', companyDescription: p.companyDescription || '',
         companyWebsite: p.companyWebsite || '', companyIndustry: p.companyIndustry || '',
+        companyPhone: p.companyPhone || '', companyAddress: p.companyAddress || '',
         showCompanySection: p.showCompanySection || false,
       })
+      setCompanySocials(parseJson(p.companySocials, []))
       setCompanyLogoUrl(p.companyLogoUrl || null)
       setCv({
         cvSkills: parseJson(p.cvSkills, []),
@@ -153,6 +168,8 @@ export default function ProfilePage() {
     await api.put('/customer/profile', {
       companyName: company.companyName || null, companyDescription: company.companyDescription || null,
       companyWebsite: company.companyWebsite || null, companyIndustry: company.companyIndustry || null,
+      companyPhone: company.companyPhone || null, companyAddress: company.companyAddress || null,
+      companySocials: JSON.stringify(companySocials),
       showCompanySection: company.showCompanySection,
     }); flash()
   }
@@ -349,6 +366,29 @@ export default function ProfilePage() {
           <div><label className="label">Sektör</label><input className="input" value={company.companyIndustry} onChange={e => setCompany(c => ({ ...c, companyIndustry: e.target.value }))} placeholder="Yazılım & Teknoloji" /></div>
           <div><label className="label">Açıklama</label><textarea className="input min-h-[90px] resize-none" value={company.companyDescription} onChange={e => setCompany(c => ({ ...c, companyDescription: e.target.value }))} placeholder="Şirketinizi kısaca tanıtın..." /></div>
           <div><label className="label">Web Sitesi</label><input className="input" value={company.companyWebsite} onChange={e => setCompany(c => ({ ...c, companyWebsite: e.target.value }))} placeholder="https://sirket.com" /></div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div><label className="label">Telefon</label><input className="input" value={company.companyPhone} onChange={e => setCompany(c => ({ ...c, companyPhone: e.target.value }))} placeholder="+90 212 000 00 00" /></div>
+            <div><label className="label">Adres</label><input className="input" value={company.companyAddress} onChange={e => setCompany(c => ({ ...c, companyAddress: e.target.value }))} placeholder="Mahalle, Cadde No, İlçe / İl" /></div>
+          </div>
+          <div>
+            <label className="label">Şirket Sosyal Medyası</label>
+            <div className="space-y-2">
+              {companySocials.map((s, i) => (
+                <div key={i} className="flex items-center gap-2 p-2 bg-gray-50 rounded-lg">
+                  <span className="text-xs font-bold text-gray-700 w-24 shrink-0">{s.platform}</span>
+                  <span className="text-xs text-gray-500 flex-1 truncate">{s.url}</span>
+                  <button onClick={() => setCompanySocials(prev => prev.filter((_, j) => j !== i))} className="text-red-400 hover:text-red-600 shrink-0"><Trash2 size={14} /></button>
+                </div>
+              ))}
+              <div className="flex gap-2">
+                <select className="input w-36" value={newCompanySocial.platform} onChange={e => setNewCompanySocial(p => ({ ...p, platform: e.target.value }))}>
+                  {['Instagram', 'LinkedIn', 'X (Twitter)', 'Facebook', 'YouTube', 'TikTok'].map(p => <option key={p} value={p}>{p}</option>)}
+                </select>
+                <input className="input flex-1" value={newCompanySocial.url} onChange={e => setNewCompanySocial(p => ({ ...p, url: e.target.value }))} placeholder="https://instagram.com/sirket" />
+                <button onClick={() => { const u = newCompanySocial.url.trim(); if (u) { setCompanySocials(p => [...p, { platform: newCompanySocial.platform, url: u }]); setNewCompanySocial(s => ({ ...s, url: '' })) } }} className="btn-primary px-3"><Plus size={16} /></button>
+              </div>
+            </div>
+          </div>
           <button onClick={saveCompany} className="btn-primary">Şirket Bilgilerini Kaydet</button>
         </div>
       )}
@@ -496,14 +536,35 @@ export default function ProfilePage() {
         <div className="space-y-6">
           <div className="card p-6 space-y-4">
             <h2 className="font-semibold text-gray-900 pb-2 border-b border-gray-100">Müşteri Yorumları</h2>
+            {testimonials.length > 0 && <p className="text-xs text-gray-400">Satırları tutamaktan (⋮⋮) sürükleyerek sıralayabilir, alanlara dokunup düzeltebilirsin.</p>}
             <div className="space-y-3">
               {testimonials.map((t, i) => (
-                <div key={i} className="p-3 bg-gray-50 rounded-lg">
-                  <div className="flex justify-between mb-1">
-                    <p className="text-sm font-bold text-gray-900">{t.name} <span className="text-gray-400 font-normal">· {t.role}</span></p>
-                    <button onClick={() => setTestimonials(prev => prev.filter((_, j) => j !== i))} className="text-red-400 hover:text-red-600"><Trash2 size={14} /></button>
+                <div
+                  key={i}
+                  className="p-3 bg-gray-50 rounded-lg flex gap-2"
+                  draggable
+                  onDragStart={() => { dragInfo.current = { list: 'testi', index: i } }}
+                  onDragOver={e => e.preventDefault()}
+                  onDrop={() => {
+                    const d = dragInfo.current
+                    if (d?.list === 'testi' && d.index !== i) setTestimonials(prev => arrayMove(prev, d.index, i))
+                    dragInfo.current = null
+                  }}
+                >
+                  <span className="text-gray-300 cursor-grab active:cursor-grabbing shrink-0 self-center" title="Sürükleyerek sırala"><GripVertical size={16} /></span>
+                  <div className="flex-1 space-y-2">
+                    <textarea className="input w-full resize-none text-xs" rows={2} value={t.quote}
+                      onChange={e => setTestimonials(prev => prev.map((x, j) => j === i ? { ...x, quote: e.target.value } : x))} placeholder="Yorum metni" />
+                    <div className="flex gap-2">
+                      <input className="input flex-1 text-xs" value={t.name}
+                        onChange={e => setTestimonials(prev => prev.map((x, j) => j === i ? { ...x, name: e.target.value } : x))} placeholder="Ad Soyad" />
+                      <input className="input flex-1 text-xs" value={t.role}
+                        onChange={e => setTestimonials(prev => prev.map((x, j) => j === i ? { ...x, role: e.target.value } : x))} placeholder="Rol" />
+                      <input className="input flex-1 text-xs" value={t.company}
+                        onChange={e => setTestimonials(prev => prev.map((x, j) => j === i ? { ...x, company: e.target.value } : x))} placeholder="Şirket" />
+                    </div>
                   </div>
-                  <p className="text-xs text-gray-500 italic">"{t.quote}"</p>
+                  <button onClick={() => setTestimonials(prev => prev.filter((_, j) => j !== i))} className="text-red-400 hover:text-red-600 shrink-0 self-center"><Trash2 size={14} /></button>
                 </div>
               ))}
             </div>
@@ -523,12 +584,37 @@ export default function ProfilePage() {
 
           <div className="card p-6 space-y-4">
             <h2 className="font-semibold text-gray-900 pb-2 border-b border-gray-100">Deneyim</h2>
+            {experience.length > 0 && <p className="text-xs text-gray-400">Satırları tutamaktan (⋮⋮) sürükleyerek sıralayabilir, alanlara dokunup düzeltebilirsin.</p>}
             <div className="space-y-2">
               {experience.map((e, i) => (
-                <div key={i} className="flex gap-3 p-3 bg-gray-50 rounded-lg">
-                  <span className="text-xs text-blue-600 font-bold w-24 shrink-0">{e.year}</span>
-                  <div className="flex-1"><p className="text-sm font-bold text-gray-900">{e.role} <span className="font-normal text-gray-500">· {e.company}</span></p><p className="text-xs text-gray-500">{e.desc}</p></div>
-                  <button onClick={() => setExperience(prev => prev.filter((_, j) => j !== i))} className="text-red-400 hover:text-red-600 shrink-0"><Trash2 size={14} /></button>
+                <div
+                  key={i}
+                  className="flex gap-2 p-3 bg-gray-50 rounded-lg"
+                  draggable
+                  onDragStart={() => { dragInfo.current = { list: 'exp', index: i } }}
+                  onDragOver={ev => ev.preventDefault()}
+                  onDrop={() => {
+                    const d = dragInfo.current
+                    if (d?.list === 'exp' && d.index !== i) setExperience(prev => arrayMove(prev, d.index, i))
+                    dragInfo.current = null
+                  }}
+                >
+                  <span className="text-gray-300 cursor-grab active:cursor-grabbing shrink-0 self-center" title="Sürükleyerek sırala"><GripVertical size={16} /></span>
+                  <div className="flex-1 space-y-2">
+                    <div className="flex gap-2">
+                      <input className="input w-28 text-xs" value={e.year}
+                        onChange={ev => setExperience(prev => prev.map((x, j) => j === i ? { ...x, year: ev.target.value } : x))} placeholder="2021—2023" />
+                      <input className="input flex-1 text-xs" value={e.role}
+                        onChange={ev => setExperience(prev => prev.map((x, j) => j === i ? { ...x, role: ev.target.value } : x))} placeholder="Unvan" />
+                    </div>
+                    <div className="flex gap-2">
+                      <input className="input flex-1 text-xs" value={e.company}
+                        onChange={ev => setExperience(prev => prev.map((x, j) => j === i ? { ...x, company: ev.target.value } : x))} placeholder="Şirket" />
+                      <input className="input flex-1 text-xs" value={e.desc}
+                        onChange={ev => setExperience(prev => prev.map((x, j) => j === i ? { ...x, desc: ev.target.value } : x))} placeholder="Açıklama" />
+                    </div>
+                  </div>
+                  <button onClick={() => setExperience(prev => prev.filter((_, j) => j !== i))} className="text-red-400 hover:text-red-600 shrink-0 self-center"><Trash2 size={14} /></button>
                 </div>
               ))}
             </div>
@@ -547,11 +633,28 @@ export default function ProfilePage() {
 
           <div className="card p-6 space-y-4">
             <h2 className="font-semibold text-gray-900 pb-2 border-b border-gray-100">Eğitim</h2>
+            {education.length > 0 && <p className="text-xs text-gray-400">Satırları tutamaktan (⋮⋮) sürükleyerek sıralayabilir, alanlara dokunup düzeltebilirsin.</p>}
             <div className="space-y-2">
               {education.map((e, i) => (
-                <div key={i} className="flex gap-3 p-3 bg-gray-50 rounded-lg">
-                  <span className="text-xs text-purple-600 font-bold w-12 shrink-0">{e.year}</span>
-                  <div className="flex-1"><p className="text-sm font-bold text-gray-900">{e.degree}</p><p className="text-xs text-gray-500">{e.school}</p></div>
+                <div
+                  key={i}
+                  className="flex gap-2 p-3 bg-gray-50 rounded-lg items-center"
+                  draggable
+                  onDragStart={() => { dragInfo.current = { list: 'edu', index: i } }}
+                  onDragOver={ev => ev.preventDefault()}
+                  onDrop={() => {
+                    const d = dragInfo.current
+                    if (d?.list === 'edu' && d.index !== i) setEducation(prev => arrayMove(prev, d.index, i))
+                    dragInfo.current = null
+                  }}
+                >
+                  <span className="text-gray-300 cursor-grab active:cursor-grabbing shrink-0" title="Sürükleyerek sırala"><GripVertical size={16} /></span>
+                  <input className="input w-20 text-xs" value={e.year}
+                    onChange={ev => setEducation(prev => prev.map((x, j) => j === i ? { ...x, year: ev.target.value } : x))} placeholder="2020" />
+                  <input className="input flex-1 text-xs" value={e.degree}
+                    onChange={ev => setEducation(prev => prev.map((x, j) => j === i ? { ...x, degree: ev.target.value } : x))} placeholder="Bölüm / Sertifika" />
+                  <input className="input flex-1 text-xs" value={e.school}
+                    onChange={ev => setEducation(prev => prev.map((x, j) => j === i ? { ...x, school: ev.target.value } : x))} placeholder="Kurum" />
                   <button onClick={() => setEducation(prev => prev.filter((_, j) => j !== i))} className="text-red-400 hover:text-red-600 shrink-0"><Trash2 size={14} /></button>
                 </div>
               ))}

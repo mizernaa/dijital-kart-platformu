@@ -90,8 +90,9 @@ body.pv-light-mode .vignette{background:radial-gradient(120% 80% at 50% 0%,trans
 .hero-kicker{font-family:var(--font-mono);font-size:11px;letter-spacing:.26em;color:var(--accent);text-transform:uppercase;margin-bottom:18px;display:inline-flex;align-items:center;gap:9px}
 .hero-kicker::before,.hero-kicker::after{content:'';width:18px;height:1px;background:var(--accent);opacity:.6}
 .hero-name{font-family:var(--font-display);font-size:clamp(46px,13vw,74px);font-weight:500;letter-spacing:-.035em;line-height:.98;margin-bottom:18px}
-.word-mask{display:inline-block;overflow:hidden;vertical-align:top;padding:0 .02em}
-.word{display:inline-block;transform:translateY(115%);transition:transform 1s cubic-bezier(0.16,1,0.3,1)}
+/* padding üst/alt: İ Ö Ü Ğ Ş noktaları ve g/p kuyrukları kırpılmasın (overflow:hidden maske animasyonu için şart) */
+.word-mask{display:inline-block;overflow:hidden;vertical-align:top;padding:.14em .04em .1em;margin:-.14em -.02em -.1em}
+.word{display:inline-block;transform:translateY(135%);transition:transform 1s cubic-bezier(0.16,1,0.3,1)}
 .hero-name.in .word{transform:none}
 .hero-sub{font-size:14px;color:var(--text);font-weight:600;margin-bottom:8px}
 .hero-sub .at{color:var(--accent)}
@@ -235,6 +236,13 @@ body.pv-light-mode .vignette{background:radial-gradient(120% 80% at 50% 0%,trans
 .co-desc{font-size:14px;color:var(--muted);line-height:1.7;margin-bottom:18px;position:relative}
 .co-link{font-family:var(--font-mono);font-size:12px;color:var(--accent);font-weight:700;display:inline-flex;align-items:center;gap:7px;transition:gap .3s;position:relative}
 .co-link:hover{gap:11px}
+.co-contact{display:flex;flex-direction:column;gap:8px;margin-bottom:18px;position:relative}
+.co-contact-row{font-size:13px;color:var(--text);display:flex;align-items:baseline;gap:10px;line-height:1.5;transition:color .3s}
+.co-contact-row:hover{color:var(--accent)}
+.co-contact-label{font-family:var(--font-mono);font-size:10px;color:var(--faint);letter-spacing:.08em;text-transform:uppercase;width:42px;flex-shrink:0}
+.co-socials{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px;position:relative}
+.co-social-pill{font-family:var(--font-mono);font-size:11px;color:var(--muted);padding:6px 13px;border:1px solid var(--line);border-radius:999px;transition:color .3s,border-color .3s}
+.co-social-pill:hover{color:var(--accent);border-color:var(--accent)}
 
 /* ─── Bio ─── */
 .bio-card{background:var(--bg-2);border:1px solid var(--line);border-radius:26px;padding:32px 28px;position:relative;overflow:hidden}

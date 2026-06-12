@@ -129,6 +129,9 @@ const Field = ({ label, children }: { label: string; children: React.ReactNode }
 
 export default function SocialPage() {
   const [data, setData] = useState<SocialData>(defaultSocialData())
+  // İlgi alanları girdisinin ham hali — virgül yazılınca anında parse edilirse
+  // virgül input'tan kaybolur (join/split döngüsü); o yüzden ham metin ayrı tutulur.
+  const [interestsRaw, setInterestsRaw] = useState<string | null>(null)
   const [displayName, setDisplayName] = useState('')
   const [avatarUrl, setAvatarUrl] = useState('')
   const [slug, setSlug] = useState('')
@@ -381,7 +384,16 @@ export default function SocialPage() {
             <div className="sm:col-span-2"><Field label="Bağlantı (URL)"><input className="input" value={data.music.url} onChange={e => patch({ music: { ...data.music, url: e.target.value } })} placeholder="https://open.spotify.com/..." /></Field></div>
           </div>
           <Field label="İlgi alanları (virgülle ayır)">
-            <input className="input" value={data.interests.join(', ')} onChange={e => patch({ interests: e.target.value.split(',').map(s => s.trim()).filter(Boolean) })} placeholder="müzik, kahve, oyun, seyahat" />
+            <input
+              className="input"
+              value={interestsRaw ?? data.interests.join(', ')}
+              onChange={e => {
+                setInterestsRaw(e.target.value)
+                patch({ interests: e.target.value.split(',').map(s => s.trim()).filter(Boolean) })
+              }}
+              onBlur={() => setInterestsRaw(null)}
+              placeholder="müzik, kahve, oyun, seyahat"
+            />
           </Field>
         </div>
 
