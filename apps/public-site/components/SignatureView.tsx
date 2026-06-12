@@ -1,6 +1,7 @@
 'use client'
 import { useEffect, useRef, useState } from 'react'
 import { trackEvent } from '@/lib/api'
+import { getPalette, resolveAccent, hexToRgb } from '@/lib/themes'
 
 const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
 const PUBLIC_SITE = process.env.NEXT_PUBLIC_PUBLIC_SITE_URL || 'http://localhost:3002'
@@ -11,12 +12,18 @@ interface SigProfile {
   slug: string; displayName: string; title: string | null; bio: string | null
   tagline: string | null; location: string | null; available: boolean
   tickerText: string | null
-  avatarUrl: string | null; accentColor: string | null; calendarUrl: string | null
-  companyName: string | null
+  avatarUrl: string | null; calendarUrl: string | null
+  theme: string; accentColor: string | null; fontFamily: string
+  buttonStyle: string; profileShape: string
+  companyName: string | null; companyLogoUrl: string | null; companyDescription: string | null
+  companyWebsite: string | null; companyIndustry: string | null
+  companyPhone?: string | null; companyAddress?: string | null; companySocials?: string | null
+  showCompanySection: boolean
+  cvSkills: string | null; cvLanguages: string | null; showCvSection: boolean
   stats: string | null; services: string | null; projects: string | null; testimonials: string | null
-  cvSkills: string | null
+  experience: string | null; education: string | null
   showStatsSection: boolean; showServicesSection: boolean; showProjectsSection: boolean
-  showTestimonialsSection: boolean; showQrSection: boolean
+  showTestimonialsSection: boolean; showCareerSection: boolean; showQrSection: boolean; showContactForm: boolean
   contacts: ContactItem[]; socials: SocialLink[]
 }
 
@@ -35,9 +42,10 @@ function contactHref(type: string, value: string) {
   if (t === 'TELEGRAM') return `https://t.me/${value.replace('@', '')}`
   return value.startsWith('http') ? value : `https://${value}`
 }
-function hexToRgb(h: string): [number, number, number] {
-  h = h.replace('#', ''); if (h.length === 3) h = h.split('').map(c => c + c).join('')
-  const n = parseInt(h, 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255]
+function contactLabel(type: string, label: string | null) {
+  if (label) return label
+  return ({ PHONE: 'Ara', EMAIL: 'E-posta', WHATSAPP: 'WhatsApp', TELEGRAM: 'Telegram',
+            WEBSITE: 'Web', CUSTOM: 'Link' } as Record<string, string>)[type.toUpperCase()] || type
 }
 
 const ICON: Record<string, JSX.Element> = {
@@ -48,6 +56,8 @@ const ICON: Record<string, JSX.Element> = {
   TELEGRAM: <svg viewBox="0 0 24 24" fill="currentColor"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z" /></svg>,
   CALENDAR: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" /></svg>,
   VCARD: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" /></svg>,
+  CUSTOM: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" /><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" /></svg>,
+  PIN: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" /><circle cx="12" cy="10" r="3" /></svg>,
 }
 
 const SOCIAL_ICON: Record<string, JSX.Element> = {
@@ -59,21 +69,37 @@ const SOCIAL_ICON: Record<string, JSX.Element> = {
   YOUTUBE: <svg viewBox="0 0 24 24" fill="currentColor"><path d="M23.5 6.2a3 3 0 0 0-2.12-2.12C19.5 3.55 12 3.55 12 3.55s-7.5 0-9.38.53A3 3 0 0 0 .5 6.2 31.3 31.3 0 0 0 0 12a31.3 31.3 0 0 0 .5 5.8 3 3 0 0 0 2.12 2.12c1.88.53 9.38.53 9.38.53s7.5 0 9.38-.53a3 3 0 0 0 2.12-2.12A31.3 31.3 0 0 0 24 12a31.3 31.3 0 0 0-.5-5.8M9.55 15.57V8.43L15.82 12z" /></svg>,
   DRIBBBLE: <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 0a12 12 0 1 0 0 24 12 12 0 0 0 0-24m7.93 5.53a10.1 10.1 0 0 1 2.3 6.32c-.34-.07-3.7-.75-7.08-.33-.07-.17-.14-.34-.22-.52-.2-.49-.44-.99-.68-1.46 3.74-1.53 5.44-3.73 5.68-4.01M12 1.78c2.55 0 4.88.96 6.65 2.53-.2.29-1.74 2.35-5.35 3.71a52 52 0 0 0-3.83-5.98c.8-.18 1.65-.26 2.53-.26M7.5 2.74a63 63 0 0 1 3.79 5.9c-4.78 1.28-9 1.25-9.45 1.25a10.2 10.2 0 0 1 5.66-7.15M1.6 12v-.31c.43.01 5.4.07 10.5-1.46.3.57.57 1.15.82 1.73l-.4.12c-5.27 1.7-8.07 6.35-8.3 6.74A10.16 10.16 0 0 1 1.6 12m10.4 10.22c-2.36 0-4.53-.8-6.26-2.15.18-.37 2.2-4.26 7.96-6.27l.06-.02a42 42 0 0 1 2.17 7.7 10.1 10.1 0 0 1-3.93.74m5.65-1.69a44 44 0 0 0-1.97-7.24c3.18-.5 5.97.33 6.32.44a10.16 10.16 0 0 1-4.35 6.8" /></svg>,
   FACEBOOK: <svg viewBox="0 0 24 24" fill="currentColor"><path d="M24 12a12 12 0 1 0-13.88 11.85v-8.38H7.08V12h3.04V9.36c0-3 1.79-4.67 4.53-4.67 1.31 0 2.68.24 2.68.24v2.95h-1.51c-1.49 0-1.95.92-1.95 1.87V12h3.32l-.53 3.47h-2.79v8.38A12 12 0 0 0 24 12" /></svg>,
+  TIKTOK: <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z" /></svg>,
+  SPOTIFY: <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z" /></svg>,
+  SOUNDCLOUD: <svg viewBox="0 0 24 24" fill="currentColor"><path d="M1.175 12.225c-.051 0-.094.046-.101.1l-.233 2.154.233 2.105c.007.058.05.098.101.098.05 0 .09-.04.099-.098l.255-2.105-.27-2.154c0-.057-.045-.1-.09-.1m-.899.828c-.06 0-.091.037-.104.094L0 14.479l.165 1.308c0 .055.045.094.09.094s.089-.045.104-.104l.21-1.319-.21-1.334c0-.061-.044-.09-.09-.09m1.83-1.229c-.061 0-.12.045-.12.104l-.21 2.563.225 2.458c0 .06.045.12.119.12.061 0 .105-.061.121-.12l.254-2.474-.254-2.548c-.016-.06-.061-.12-.135-.12m.945-.089c-.075 0-.135.06-.15.135l-.193 2.64.21 2.544c.016.077.075.138.149.138.075 0 .135-.061.15-.15l.24-2.532-.24-2.623c0-.075-.06-.135-.135-.135l-.031-.017zm1.155.36c-.005-.09-.075-.149-.159-.149-.09 0-.158.06-.164.149l-.217 2.43.2 2.563c0 .09.075.157.159.157.074 0 .148-.068.148-.158l.227-2.563-.227-2.444.033.015zm.809-1.709c-.101 0-.18.09-.18.181l-.21 3.957.187 2.563c0 .09.08.164.18.164.094 0 .174-.09.18-.18l.209-2.563-.209-3.972c-.008-.104-.088-.18-.18-.18m.959-.914c-.105 0-.195.09-.203.194l-.18 4.872.165 2.548c0 .12.09.209.195.209.104 0 .194-.089.21-.209l.193-2.548-.192-4.856c-.016-.12-.105-.21-.21-.21m.989-.449c-.121 0-.211.089-.225.209l-.165 5.275.165 2.52c.014.119.104.225.225.225.119 0 .225-.105.225-.225l.195-2.52-.196-5.275c0-.12-.105-.225-.225-.225m1.245.045c0-.135-.105-.24-.24-.24-.119 0-.24.105-.24.24l-.149 5.441.149 2.503c.016.135.121.24.256.24s.24-.105.24-.24l.164-2.503-.164-5.456-.016.015zm.749-.134c-.135 0-.255.119-.255.254l-.15 5.322.15 2.473c0 .15.12.255.255.255s.255-.105.255-.255l.15-2.473-.165-5.307c0-.148-.12-.255-.24-.255m1.005.166c-.164 0-.284.135-.284.285l-.103 5.143.135 2.474c0 .149.119.277.284.277.149 0 .271-.128.284-.277l.121-2.474-.121-5.158c-.013-.149-.135-.27-.284-.27m1.184-.945c-.045-.029-.105-.044-.165-.044s-.119.015-.165.044c-.09.054-.149.15-.149.255v.061l-.104 6.048.115 2.449v.008c.008.06.03.135.074.18.06.075.15.12.24.12.074 0 .149-.03.209-.09.06-.06.091-.135.091-.225l.015-.24.117-2.203-.135-6.086c0-.104-.061-.193-.135-.247l-.008-.03zm1.006-.547c-.045-.045-.09-.061-.15-.061-.074 0-.149.016-.209.061-.075.06-.119.15-.119.24v.029l-.137 6.609.075 1.215.061 1.185c0 .164.148.314.328.314.181 0 .33-.15.33-.329l.15-2.414-.15-6.637c0-.12-.074-.221-.165-.277l-.014.065zm8.934 3.777c-.405 0-.795.086-1.139.232-.24-2.654-2.46-4.736-5.188-4.736-.659 0-1.305.135-1.889.359-.225.09-.27.18-.285.359v9.368c.016.18.15.33.33.345h8.185C22.681 17.218 24 15.914 24 14.28s-1.319-2.952-2.938-2.952" /></svg>,
 }
+
+/* Dinamik bölüm numaralandırma için yardımcı */
+function two(n: number) { return String(n).padStart(2, '0') }
 
 export function SignatureView({ profile, slug, source }: { profile: SigProfile; slug: string; source?: string }) {
   const root = useRef<HTMLDivElement>(null)
   const [toastMsg, setToastMsg] = useState('')
   const toastT = useRef<any>(null)
 
-  const accent = profile.accentColor && /^#[0-9a-fA-F]{6}$/.test(profile.accentColor) ? profile.accentColor : '#d9a93f'
+  /* ── Tasarım ayarları: tema paleti + vurgu + font + şekiller ── */
+  const pal = getPalette(profile.theme)
+  const accent = resolveAccent(pal, profile.accentColor)
   const [ar, ag, ab] = hexToRgb(accent)
+  const bodyFont = `'${profile.fontFamily || 'Manrope'}', system-ui, sans-serif`
+  const avatarRadius = profile.profileShape === 'SQUARE' ? '18px' : profile.profileShape === 'HEXAGON' ? '0px' : '50%'
+  const avatarClip = profile.profileShape === 'HEXAGON' ? 'polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%)' : 'none'
+  const btnRadius = profile.buttonStyle === 'PILL' ? '999px' : profile.buttonStyle === 'SQUARE' ? '4px' : '14px'
 
   const stats = parseJ<{ value: string; label: string }[]>(profile.stats, [])
   const services = parseJ<{ icon?: string; title: string; desc?: string }[]>(profile.services, [])
-  const projects = parseJ<{ title: string; category?: string; desc?: string }[]>(profile.projects, [])
+  const projects = parseJ<{ title: string; category?: string; desc?: string; tags?: string | string[] }[]>(profile.projects, [])
   const testimonials = parseJ<{ quote: string; name: string; role?: string; company?: string }[]>(profile.testimonials, [])
   const skills = parseJ<string[]>(profile.cvSkills, [])
+  const languages = parseJ<string[]>(profile.cvLanguages, [])
+  const experience = parseJ<{ year: string; role: string; company?: string; desc?: string }[]>(profile.experience, [])
+  const education = parseJ<{ year: string; degree: string; school?: string }[]>(profile.education, [])
+  const companySocials = parseJ<{ platform: string; url: string }[]>(profile.companySocials || null, [])
 
   const nameParts = (profile.displayName || '').trim().split(/\s+/).filter(Boolean)
   const line1 = nameParts[0] || profile.displayName || ''
@@ -84,11 +110,29 @@ export function SignatureView({ profile, slug, source }: { profile: SigProfile; 
   const tickerItems = customTicker.length > 0 ? customTicker
     : (services.length ? services.map(s => s.title) : skills.length ? skills : ['Dijital Kimlik', 'NFC', 'QR Kart'])
   const manifesto = profile.tagline || profile.bio || ''
+  // Tagline manifesto olduysa bio'yu açılışta göster; ikisi de ayrı yaşasın
+  const introBio = profile.tagline ? profile.bio : null
   const vcardUrl = `${API}/p/${slug}/vcard`
   const profileUrl = `${PUBLIC_SITE}/u/${slug}`
-  const qrSrc = `https://api.qrserver.com/v1/create-qr-code/?size=280x280&data=${encodeURIComponent(profileUrl)}`
+  const qrBg = pal.bg.replace('#', '')
+  const qrFg = pal.dark ? 'ffffff' : '111111'
+  const qrSrc = `https://api.qrserver.com/v1/create-qr-code/?size=280x280&bgcolor=${qrBg}&color=${qrFg}&data=${encodeURIComponent(profileUrl)}`
 
   const [qi, setQi] = useState(0)
+  const [leadForm, setLeadForm] = useState({ name: '', email: '', message: '' })
+  const [leadStatus, setLeadStatus] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle')
+
+  /* ── Bölüm numaraları: yalnızca görünen bölümler sayılır ── */
+  const hasManifesto = !!manifesto
+  const hasStats = profile.showStatsSection && stats.length > 0
+  const hasServices = profile.showServicesSection && services.length > 0
+  const hasProjects = profile.showProjectsSection && projects.length > 0
+  const hasTesti = profile.showTestimonialsSection && testimonials.length > 0
+  const hasCareer = profile.showCareerSection && (experience.length > 0 || education.length > 0)
+  const hasSkills = profile.showCvSection && (skills.length > 0 || languages.length > 0)
+  const hasCompany = profile.showCompanySection && !!profile.companyName
+  let secNo = 1
+  const num = () => two(++secNo)
 
   function toast(s: string) { setToastMsg(s); clearTimeout(toastT.current); toastT.current = setTimeout(() => setToastMsg(''), 2400) }
   const onClick = (label: string) => trackEvent(slug, { eventType: 'BUTTON_CLICK', buttonLabel: label })
@@ -207,24 +251,63 @@ export function SignatureView({ profile, slug, source }: { profile: SigProfile; 
     el.querySelectorAll('[data-r]').forEach(n => io.observe(n))
     cleanups.push(() => io.disconnect())
 
+    // Kariyer zaman çizgisi çizimi
+    const tl = $('.sig-tl-line')
+    if (tl) {
+      const tlObs = new IntersectionObserver(([e]) => {
+        if (e.isIntersecting) {
+          tl.style.transition = 'transform 1.2s cubic-bezier(.16,1,.3,1)'
+          tl.style.transform = 'scaleY(1)'
+          el.querySelectorAll('.sig-tl-dot').forEach((d, i) => setTimeout(() => d.classList.add('on'), 200 + i * 160))
+          tlObs.disconnect()
+        }
+      }, { threshold: .15 })
+      tlObs.observe(tl.parentElement!)
+      cleanups.push(() => tlObs.disconnect())
+    }
+
     return () => cleanups.forEach(fn => fn())
   }, [ar, ag, ab])
 
-  // İletişim kanalları
-  const byType = (t: string) => profile.contacts.find(c => c.type.toUpperCase() === t)
+  const submitLead = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!leadForm.name || !leadForm.message) return
+    setLeadStatus('sending')
+    try {
+      const res = await fetch(`${API}/p/${slug}/lead`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(leadForm),
+      })
+      if (res.ok) { setLeadStatus('sent'); setLeadForm({ name: '', email: '', message: '' }) }
+      else setLeadStatus('error')
+    } catch { setLeadStatus('error') }
+  }
+
+  /* ── İletişim kanalları: rehber + TÜM iletişim satırları + takvim ── */
   const channels: { key: string; href: string; label: string; icon: JSX.Element; solid?: boolean; download?: boolean; ext?: boolean }[] = []
   channels.push({ key: 'vcard', href: vcardUrl, label: 'Rehbere Kaydet', icon: ICON.VCARD, solid: true, download: true })
-  const phone = byType('PHONE'); if (phone) channels.push({ key: 'phone', href: contactHref('PHONE', phone.value), label: 'Ara', icon: ICON.PHONE })
-  const wa = byType('WHATSAPP'); if (wa) channels.push({ key: 'wa', href: contactHref('WHATSAPP', wa.value), label: 'WhatsApp', icon: ICON.WHATSAPP, ext: true })
-  const email = byType('EMAIL'); if (email) channels.push({ key: 'email', href: contactHref('EMAIL', email.value), label: 'E-posta', icon: ICON.EMAIL })
-  const web = byType('WEBSITE'); if (web) channels.push({ key: 'web', href: contactHref('WEBSITE', web.value), label: 'Web', icon: ICON.WEBSITE, ext: true })
-  if (profile.calendarUrl) channels.push({ key: 'cal', href: profile.calendarUrl, label: 'Toplantı', icon: ICON.CALENDAR, ext: true })
+  profile.contacts.slice().sort((a, b) => a.order - b.order).forEach(c => {
+    const t = c.type.toUpperCase()
+    channels.push({
+      key: c.id, href: contactHref(c.type, c.value), label: contactLabel(c.type, c.label),
+      icon: ICON[t] || ICON.CUSTOM, ext: !['PHONE', 'EMAIL'].includes(t),
+    })
+  })
+  if (profile.calendarUrl) channels.push({ key: 'cal', href: profile.calendarUrl, label: 'Toplantı Ayarla', icon: ICON.CALENDAR, ext: true })
 
   const socials = (profile.socials || []).slice().sort((a, b) => a.order - b.order)
   const q = testimonials[qi]
 
+  const rootVars = {
+    '--bg': pal.bg, '--bg-2': pal.bg2, '--ink': pal.text, '--mut': pal.muted, '--dim': pal.faint,
+    '--gold': accent, '--gold-2': shadeHex(accent, -0.25), '--gold-soft': `rgba(${ar},${ag},${ab},.16)`,
+    '--sig-line': pal.line, '--sig-btn-r': btnRadius,
+    '--sig-av-r': avatarRadius, '--sig-av-clip': avatarClip,
+    fontFamily: bodyFont,
+  } as React.CSSProperties
+
   return (
-    <div className="sig-root" ref={root} style={{ ['--gold' as any]: accent, ['--gold-soft' as any]: `rgba(${ar},${ag},${ab},.16)` }}>
+    <div className={`sig-root${pal.dark ? '' : ' sig-light'}`} ref={root} style={rootVars}>
       <div id="sig-cursor" /><div id="sig-ring" />
       <canvas id="sig-field" />
 
@@ -239,14 +322,27 @@ export function SignatureView({ profile, slug, source }: { profile: SigProfile; 
       <main>
         {/* 01 Açılış */}
         <section className="act-1 frame">
+          {(profile.avatarUrl || profile.available) && (
+            <div className="sig-avatar-wrap">
+              {profile.avatarUrl && (
+                <img className="sig-avatar" src={profile.avatarUrl.startsWith('http') ? profile.avatarUrl : `${API}${profile.avatarUrl}`}
+                     alt={profile.displayName} loading="lazy" />
+              )}
+            </div>
+          )}
           {profile.title && <div className="lbl" style={{ marginBottom: 26 }}>{profile.title}</div>}
           <h1 className="giant-name">
             <span className="row"><span>{line1}</span></span>
             {line2 && <span className="row"><span>{line2}</span></span>}
           </h1>
           <div className="act1-meta">
-            {(profile.bio || profile.companyName) && (
-              <p className="who">{profile.companyName && <b>{profile.companyName}</b>}{profile.companyName && profile.bio ? ' · ' : ''}{profile.bio}</p>
+            {(introBio || profile.companyName) && (
+              <p className="who">
+                {profile.companyName && <b>{profile.companyName}</b>}
+                {profile.companyName && profile.companyIndustry && <span className="who-ind"> — {profile.companyIndustry}</span>}
+                {profile.companyName && introBio ? ' · ' : ''}
+                {introBio}
+              </p>
             )}
             <div className="coords">
               {profile.location && <>{profile.location.toUpperCase()}<br /></>}
@@ -257,7 +353,7 @@ export function SignatureView({ profile, slug, source }: { profile: SigProfile; 
         </section>
 
         {/* Şerit */}
-        {(customTicker.length > 0 || profile.showServicesSection) && tickerItems.length > 0 && (
+        {tickerItems.length > 0 && (
           <div className="ticker" data-r>
             <div className="ticker-track" id="sig-ticker">
               {tickerItems.map((t, i) => <span key={i} className={`t${i % 2 ? ' solid' : ''}`}>{t}</span>)}
@@ -265,18 +361,18 @@ export function SignatureView({ profile, slug, source }: { profile: SigProfile; 
           </div>
         )}
 
-        {/* 02 Manifesto */}
-        {manifesto && (
+        {/* Manifesto */}
+        {hasManifesto && (
           <section className="act-2 frame">
-            <div data-r><span className="idx">02</span>&nbsp;&nbsp;<span className="lbl">Manifesto</span></div>
+            <div data-r><span className="idx">{num()}</span>&nbsp;&nbsp;<span className="lbl">Manifesto</span></div>
             <p className="manifesto" id="sig-manifesto" data-r>{manifesto}</p>
           </section>
         )}
 
-        {/* 03 Sayılar */}
-        {profile.showStatsSection && stats.length > 0 && (
+        {/* Sayılar */}
+        {hasStats && (
           <section className="act-3 frame">
-            <div data-r><span className="idx">03</span>&nbsp;&nbsp;<span className="lbl">Rakamlarla</span></div>
+            <div data-r><span className="idx">{num()}</span>&nbsp;&nbsp;<span className="lbl">Rakamlarla</span></div>
             <div className="bignums" data-r id="sig-nums">
               {stats.slice(0, 4).map((s, i) => {
                 const n = splitNum(s.value)
@@ -291,26 +387,52 @@ export function SignatureView({ profile, slug, source }: { profile: SigProfile; 
           </section>
         )}
 
-        {/* 04 İşler */}
-        {profile.showProjectsSection && projects.length > 0 && (
+        {/* Hizmetler */}
+        {hasServices && (
+          <section className="act-svc frame">
+            <div data-r style={{ marginBottom: 28 }}><span className="idx">{num()}</span>&nbsp;&nbsp;<span className="lbl">Hizmetler</span></div>
+            <div className="svc-grid">
+              {services.map((s, i) => (
+                <div className="svc-card" data-r key={i}>
+                  <div className="svc-top">
+                    {s.icon && <span className="svc-glyph">{s.icon}</span>}
+                    <span className="svc-no">{two(i + 1)}</span>
+                  </div>
+                  <h3 className="svc-name">{s.title}</h3>
+                  {s.desc && <p className="svc-text">{s.desc}</p>}
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* İşler */}
+        {hasProjects && (
           <section className="act-4 frame">
-            <div data-r style={{ marginBottom: 28 }}><span className="idx">04</span>&nbsp;&nbsp;<span className="lbl">Seçili İşler</span></div>
+            <div data-r style={{ marginBottom: 28 }}><span className="idx">{num()}</span>&nbsp;&nbsp;<span className="lbl">Seçili İşler</span></div>
             {projects.map((p, i) => (
               <div className="work" data-r key={i}>
                 <span className="w-line" />
                 <div className="w-top"><span className="w-idx">{['①', '②', '③', '④', '⑤', '⑥'][i] || `0${i + 1}`}</span><h3>{p.title}</h3></div>
                 {p.category && <div className="w-cat">{p.category}</div>}
                 {p.desc && <p className="w-desc">{p.desc}</p>}
+                {p.tags && (
+                  <div className="w-tags">
+                    {(Array.isArray(p.tags) ? p.tags : String(p.tags).split(',')).map(t => t.trim()).filter(Boolean).map((t, j) => (
+                      <span key={j} className="w-tag">{t}</span>
+                    ))}
+                  </div>
+                )}
                 <span className="w-arrow">→</span>
               </div>
             ))}
           </section>
         )}
 
-        {/* 05 Söz */}
-        {profile.showTestimonialsSection && testimonials.length > 0 && q && (
+        {/* Söz */}
+        {hasTesti && q && (
           <section className="act-5 frame">
-            <div data-r><span className="idx">05</span>&nbsp;&nbsp;<span className="lbl">Dedikleri</span></div>
+            <div data-r><span className="idx">{num()}</span>&nbsp;&nbsp;<span className="lbl">Dedikleri</span></div>
             <blockquote className="colossal-quote" data-r>{q.quote}</blockquote>
             <div className="q-who" data-r><b>{q.name}</b>{q.company ? ` — ${q.company}` : q.role ? ` — ${q.role}` : ''}</div>
             {testimonials.length > 1 && (
@@ -323,7 +445,106 @@ export function SignatureView({ profile, slug, source }: { profile: SigProfile; 
           </section>
         )}
 
-        {/* 06 Temas */}
+        {/* Kariyer & Eğitim */}
+        {hasCareer && (
+          <section className="act-career frame">
+            <div data-r style={{ marginBottom: 30 }}><span className="idx">{num()}</span>&nbsp;&nbsp;<span className="lbl">Yolculuk</span></div>
+            {experience.length > 0 && (
+              <div className="sig-timeline" data-r>
+                <div className="sig-tl-line" />
+                {experience.map((e, i) => (
+                  <div className="sig-tl-item" key={i}>
+                    <span className="sig-tl-dot" />
+                    <div className="sig-tl-year">{e.year}</div>
+                    <div className="sig-tl-role">{e.role}{e.company && <span className="sig-tl-co"> · {e.company}</span>}</div>
+                    {e.desc && <p className="sig-tl-desc">{e.desc}</p>}
+                  </div>
+                ))}
+              </div>
+            )}
+            {education.length > 0 && (
+              <div className="sig-edu" data-r>
+                <div className="sig-edu-head">EĞİTİM</div>
+                {education.map((e, i) => (
+                  <div className="sig-edu-row" key={i}>
+                    <span className="sig-edu-year">{e.year}</span>
+                    <span className="sig-edu-deg">{e.degree}</span>
+                    {e.school && <span className="sig-edu-school">{e.school}</span>}
+                  </div>
+                ))}
+              </div>
+            )}
+          </section>
+        )}
+
+        {/* Beceriler & Diller */}
+        {hasSkills && (
+          <section className="act-skills frame">
+            <div data-r style={{ marginBottom: 28 }}><span className="idx">{num()}</span>&nbsp;&nbsp;<span className="lbl">Beceriler</span></div>
+            {skills.length > 0 && (
+              <div className="sig-pills" data-r>
+                {skills.map((s, i) => <span key={i} className="sig-pill">{s}</span>)}
+              </div>
+            )}
+            {languages.length > 0 && (
+              <div className="sig-langs" data-r>
+                <span className="sig-lang-head">DİLLER —</span>
+                {languages.map((l, i) => <span key={i} className="sig-lang">{l}</span>)}
+              </div>
+            )}
+          </section>
+        )}
+
+        {/* Şirket */}
+        {hasCompany && (
+          <section className="act-company frame">
+            <div data-r style={{ marginBottom: 28 }}><span className="idx">{num()}</span>&nbsp;&nbsp;<span className="lbl">Şirket</span></div>
+            <div className="sig-co" data-r>
+              <div className="sig-co-head">
+                {profile.companyLogoUrl && (
+                  <img className="sig-co-logo"
+                       src={profile.companyLogoUrl.startsWith('http') ? profile.companyLogoUrl : `${API}${profile.companyLogoUrl}`}
+                       alt={`${profile.companyName} logosu`} loading="lazy" />
+                )}
+                <div>
+                  <h3 className="sig-co-name">{profile.companyName}</h3>
+                  {profile.companyIndustry && <div className="sig-co-ind">{profile.companyIndustry}</div>}
+                </div>
+              </div>
+              {profile.companyDescription && <p className="sig-co-desc">{profile.companyDescription}</p>}
+              {(profile.companyPhone || profile.companyAddress) && (
+                <div className="sig-co-contact">
+                  {profile.companyPhone && (
+                    <a href={`tel:${profile.companyPhone.replace(/\s/g, '')}`} onClick={() => onClick('Şirket Tel')}>
+                      {ICON.PHONE}<span>{profile.companyPhone}</span>
+                    </a>
+                  )}
+                  {profile.companyAddress && (
+                    <a href={`https://maps.google.com/?q=${encodeURIComponent(profile.companyAddress)}`} target="_blank" rel="noopener noreferrer" onClick={() => onClick('Şirket Adres')}>
+                      {ICON.PIN}<span>{profile.companyAddress}</span>
+                    </a>
+                  )}
+                </div>
+              )}
+              {(companySocials.length > 0 || profile.companyWebsite) && (
+                <div className="sig-co-links">
+                  {profile.companyWebsite && (
+                    <a className="sig-co-pill solid" href={profile.companyWebsite} target="_blank" rel="noopener noreferrer" onClick={() => onClick('Şirket Web')}>
+                      Web Sitesi ↗
+                    </a>
+                  )}
+                  {companySocials.filter(s => s?.url).map((s, i) => (
+                    <a key={i} className="sig-co-pill" href={s.url} target="_blank" rel="noopener noreferrer" onClick={() => onClick(`Şirket ${s.platform}`)}>
+                      {s.platform}
+                    </a>
+                  ))}
+                </div>
+              )}
+            </div>
+          </section>
+        )}
+
+        {/* Temas */}
         <section className="act-6">
           <a className="contact-giant" href={vcardUrl} onClick={() => onClick('vcard')}>
             <div className="cg-lbl">Bir sonraki büyük işin için</div>
@@ -353,6 +574,35 @@ export function SignatureView({ profile, slug, source }: { profile: SigProfile; 
           </div>
         </section>
 
+        {/* Bana Yaz */}
+        {profile.showContactForm && (
+          <section className="act-form frame">
+            <div data-r style={{ marginBottom: 30 }}><span className="idx">{two(secNo + 1)}</span>&nbsp;&nbsp;<span className="lbl">Bana Yaz</span></div>
+            {leadStatus === 'sent' ? (
+              <div className="sig-form-ok" data-r>
+                <div className="sig-form-ok-mark">✓</div>
+                <div className="sig-form-ok-msg">Mesajın iletildi.</div>
+                <div className="sig-form-ok-sub">En kısa sürede dönüş yapılacak.</div>
+              </div>
+            ) : (
+              <form className="sig-form" data-r onSubmit={submitLead}>
+                <div className="sf-row">
+                  <input type="text" required placeholder="Ad Soyad *" autoComplete="name"
+                         value={leadForm.name} onChange={e => setLeadForm(f => ({ ...f, name: e.target.value }))} />
+                  <input type="email" placeholder="E-posta" autoComplete="email" inputMode="email"
+                         value={leadForm.email} onChange={e => setLeadForm(f => ({ ...f, email: e.target.value }))} />
+                </div>
+                <textarea required placeholder="Mesajın *" rows={4}
+                          value={leadForm.message} onChange={e => setLeadForm(f => ({ ...f, message: e.target.value }))} />
+                {leadStatus === 'error' && <p className="sf-err">Bir hata oluştu, lütfen tekrar deneyin.</p>}
+                <button type="submit" className="sf-send" disabled={leadStatus === 'sending'}>
+                  {leadStatus === 'sending' ? 'GÖNDERİLİYOR…' : 'GÖNDER →'}
+                </button>
+              </form>
+            )}
+          </section>
+        )}
+
         <footer className="endmark frame">
           <div className="e-sig">{line1} <b>{line2}</b></div>
           <div className="e-sub">Q·Kart Signature</div>
@@ -371,4 +621,12 @@ export function SignatureView({ profile, slug, source }: { profile: SigProfile; 
       <div className={`sig-toast${toastMsg ? ' show' : ''}`}>{toastMsg}</div>
     </div>
   )
+}
+
+/* Vurgu renginden koyu ton üretir (gold-2) */
+function shadeHex(h: string, p: number) {
+  const [r, g, b] = hexToRgb(h)
+  const f = 1 + p
+  const c = (x: number) => Math.max(0, Math.min(255, Math.round(x * f)))
+  return '#' + [c(r), c(g), c(b)].map(x => x.toString(16).padStart(2, '0')).join('')
 }

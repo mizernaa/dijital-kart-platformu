@@ -207,6 +207,11 @@ body.pv-light-mode .vignette{background:radial-gradient(120% 80% at 50% 0%,trans
 
 /* ─── Skills ─── */
 .marquee{position:relative;overflow:hidden;margin-bottom:30px;-webkit-mask-image:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent);mask-image:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent)}
+/* Hero altı kayan şerit (tickerText) */
+.ticker-band{border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:18px 0;background:rgba(255,255,255,.015)}
+.ticker-band .marquee{margin-bottom:0}
+.ticker-item{font-style:italic;font-size:21px;color:var(--muted)}
+.ticker-item::after{opacity:.8}
 .marquee-track{display:flex;gap:14px;width:max-content;animation:marquee 26s linear infinite}
 .marquee:hover .marquee-track{animation-play-state:paused}
 .mq-item{font-family:var(--font-display);font-size:26px;font-weight:500;color:var(--faint);white-space:nowrap;display:inline-flex;align-items:center;gap:14px;transition:color .3s}
@@ -236,6 +241,10 @@ body.pv-light-mode .vignette{background:radial-gradient(120% 80% at 50% 0%,trans
 .co-desc{font-size:14px;color:var(--muted);line-height:1.7;margin-bottom:18px;position:relative}
 .co-link{font-family:var(--font-mono);font-size:12px;color:var(--accent);font-weight:700;display:inline-flex;align-items:center;gap:7px;transition:gap .3s;position:relative}
 .co-link:hover{gap:11px}
+.co-head{display:flex;align-items:center;gap:16px;margin-bottom:12px;position:relative}
+.co-head .co-name{margin-bottom:0}
+.co-logo{width:58px;height:58px;border-radius:14px;object-fit:cover;border:1px solid var(--line);background:rgba(255,255,255,.06);flex-shrink:0}
+.co-industry{font-family:var(--font-mono);font-size:11px;color:var(--muted);letter-spacing:.06em;margin-top:4px;text-transform:uppercase}
 .co-contact{display:flex;flex-direction:column;gap:8px;margin-bottom:18px;position:relative}
 .co-contact-row{font-size:13px;color:var(--text);display:flex;align-items:baseline;gap:10px;line-height:1.5;transition:color .3s}
 .co-contact-row:hover{color:var(--accent)}

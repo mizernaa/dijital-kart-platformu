@@ -14,6 +14,7 @@ interface Profile {
   companyPhone?: string | null; companyAddress?: string | null; companySocials?: string | null
   cvSkills: string | null; cvLanguages: string | null; showCvSection: boolean
   location: string | null; tagline: string | null; available: boolean; calendarUrl: string | null
+  tickerText?: string | null
   stats: string | null; services: string | null; projects: string | null
   testimonials: string | null; experience: string | null; education: string | null
   showStatsSection: boolean; showServicesSection: boolean; showProjectsSection: boolean
@@ -71,6 +72,7 @@ const IC = {
   check:    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>,
   ext:      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15,3 21,3 21,9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>,
   chevron:  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"/></svg>,
+  cal:      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>,
 }
 
 function ContactIcon({ type }: { type: string }) {
@@ -472,11 +474,32 @@ export function ProfileView({ profile, slug, source }: { profile: Profile; slug:
             <div className="hero-btns">
               <button className="btn btn-primary" onClick={downloadVCard}>{IC.download} Rehbere Kaydet</button>
               <a href="#contact-form" className="btn btn-secondary">{IC.msg} İletişime Geç</a>
+              {profile.calendarUrl && (
+                <a href={profile.calendarUrl} target="_blank" rel="noopener noreferrer" className="btn btn-secondary"
+                   onClick={() => trackEvent(slug, { eventType: 'BUTTON_CLICK', buttonLabel: 'Toplantı Ayarla' })}>
+                  {IC.cal} Toplantı Ayarla
+                </a>
+              )}
             </div>
           </Reveal>
         </div>
         <div className="scroll-hint">{IC.chevron}</div>
       </section>
+
+      {/* ── TICKER (kayan şerit) ── */}
+      {(() => {
+        const words = (profile.tickerText || '').split(',').map(w => w.trim()).filter(Boolean)
+        if (words.length === 0) return null
+        return (
+          <div className="ticker-band" aria-hidden="true">
+            <div className="marquee ticker-mq">
+              <div className="marquee-track">
+                {[...words, ...words, ...words].map((w, i) => <span key={i} className="mq-item ticker-item">{w}</span>)}
+              </div>
+            </div>
+          </div>
+        )
+      })()}
 
       {/* ── STATS ── */}
       {profile.showStatsSection && stats.length > 0 && (
@@ -688,7 +711,20 @@ export function ProfileView({ profile, slug, source }: { profile: Profile; slug:
             <SectionHead num="08" eyebrow="Şirket" title={<em>{profile.companyName}</em>}/>
             <Reveal>
               <TiltCard className="company-card">
-                <div className="co-name">{profile.companyName}</div>
+                <div className="co-head">
+                  {profile.companyLogoUrl && (
+                    <img
+                      className="co-logo"
+                      src={profile.companyLogoUrl.startsWith('http') ? profile.companyLogoUrl : `${API}${profile.companyLogoUrl}`}
+                      alt={`${profile.companyName} logosu`}
+                      loading="lazy"
+                    />
+                  )}
+                  <div>
+                    <div className="co-name">{profile.companyName}</div>
+                    {profile.companyIndustry && <div className="co-industry">{profile.companyIndustry}</div>}
+                  </div>
+                </div>
                 {profile.companyDescription && <div className="co-desc">{profile.companyDescription}</div>}
                 {(profile.companyPhone || profile.companyAddress) && (
                   <div className="co-contact">

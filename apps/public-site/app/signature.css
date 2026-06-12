@@ -159,3 +159,106 @@
 /* toast */
 .sig-root .sig-toast{position:fixed;bottom:26px;left:50%;transform:translateX(-50%) translateY(90px);background:var(--bg-2);border:1px solid var(--gold);font-size:13px;font-weight:600;padding:13px 26px;border-radius:40px;opacity:0;transition:all .5s var(--ease);z-index:400}
 .sig-root .sig-toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+
+/* ===== Genişletilmiş bölümler (tüm profil verisi) ===== */
+
+/* açılış avatarı — profileShape'e uyar */
+.sig-root .sig-avatar-wrap{margin-bottom:30px}
+.sig-root .sig-avatar{width:108px;height:108px;object-fit:cover;border-radius:var(--sig-av-r,50%);clip-path:var(--sig-av-clip,none);border:1px solid var(--gold);box-shadow:0 0 0 6px var(--gold-soft),0 18px 50px rgba(0,0,0,.4);animation:sigAvIn 1.2s var(--ease) .2s both}
+@keyframes sigAvIn{from{opacity:0;transform:translateY(24px) scale(.92)}to{opacity:1;transform:none}}
+.sig-root .who-ind{color:var(--dim);font-weight:400}
+
+/* kanallar buttonStyle'a uyar */
+.sig-root .chan{border-radius:var(--sig-btn-r,40px)}
+
+/* hizmetler */
+.sig-root .act-svc{padding:0 0 130px}
+.sig-root .svc-grid{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--gold-soft);border:1px solid var(--gold-soft)}
+@media(max-width:560px){.sig-root .svc-grid{grid-template-columns:1fr}}
+.sig-root .svc-card{background:var(--bg);padding:30px 26px;transition:background .5s;position:relative}
+.sig-root .svc-card:hover{background:var(--bg-2)}
+.sig-root .svc-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+.sig-root .svc-glyph{font-size:24px;color:var(--gold)}
+.sig-root .svc-no{font-family:"Space Grotesk";font-size:12px;color:var(--dim);letter-spacing:.2em}
+.sig-root .svc-name{font-size:19px;font-weight:600;letter-spacing:-.02em;transition:color .4s}
+.sig-root .svc-card:hover .svc-name{color:var(--gold)}
+.sig-root .svc-text{font-size:13.5px;color:var(--mut);line-height:1.7;margin-top:8px}
+
+/* iş etiketleri */
+.sig-root .w-tags{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.sig-root .w-tag{font-family:"Space Grotesk";font-size:11px;letter-spacing:.1em;color:var(--mut);padding:5px 12px;border:1px solid var(--sig-line,rgba(246,241,232,.14));border-radius:999px;text-transform:uppercase}
+
+/* kariyer zaman çizgisi */
+.sig-root .act-career{padding:0 0 130px}
+.sig-root .sig-timeline{position:relative;padding-left:34px;margin-top:10px}
+.sig-root .sig-tl-line{position:absolute;left:8px;top:6px;bottom:6px;width:1px;background:linear-gradient(var(--gold),var(--gold-soft));transform:scaleY(0);transform-origin:top}
+.sig-root .sig-tl-item{position:relative;padding:0 0 42px}
+.sig-root .sig-tl-item:last-child{padding-bottom:0}
+.sig-root .sig-tl-dot{position:absolute;left:-30px;top:6px;width:9px;height:9px;border-radius:50%;border:1px solid var(--gold);background:var(--bg);transition:background .5s,box-shadow .5s}
+.sig-root .sig-tl-dot.on{background:var(--gold);box-shadow:0 0 14px var(--gold-soft)}
+.sig-root .sig-tl-year{font-family:"Space Grotesk";font-size:12px;letter-spacing:.22em;color:var(--gold)}
+.sig-root .sig-tl-role{font-size:17px;font-weight:600;margin-top:6px;letter-spacing:-.01em}
+.sig-root .sig-tl-co{color:var(--mut);font-weight:400}
+.sig-root .sig-tl-desc{font-size:13.5px;color:var(--mut);line-height:1.7;margin-top:6px;max-width:52ch}
+.sig-root .sig-edu{margin-top:54px}
+.sig-root .sig-edu-head{font-family:"Space Grotesk";font-size:12px;letter-spacing:.3em;color:var(--dim);margin-bottom:18px}
+.sig-root .sig-edu-row{display:flex;align-items:baseline;gap:18px;padding:14px 0;border-top:1px solid var(--sig-line,rgba(246,241,232,.08));flex-wrap:wrap}
+.sig-root .sig-edu-row:last-child{border-bottom:1px solid var(--sig-line,rgba(246,241,232,.08))}
+.sig-root .sig-edu-year{font-family:"Space Grotesk";font-size:12px;color:var(--gold);letter-spacing:.15em;min-width:52px}
+.sig-root .sig-edu-deg{font-size:15px;font-weight:600}
+.sig-root .sig-edu-school{font-size:13px;color:var(--mut);margin-left:auto}
+
+/* beceriler & diller */
+.sig-root .act-skills{padding:0 0 130px}
+.sig-root .sig-pills{display:flex;flex-wrap:wrap;gap:10px}
+.sig-root .sig-pill{font-family:"Space Grotesk";font-size:13px;letter-spacing:.04em;padding:9px 18px;border:1px solid var(--sig-line,rgba(246,241,232,.14));border-radius:999px;color:var(--ink);transition:border-color .4s,color .4s,transform .4s var(--ease)}
+.sig-root .sig-pill:hover{border-color:var(--gold);color:var(--gold);transform:translateY(-3px)}
+.sig-root .sig-langs{display:flex;flex-wrap:wrap;align-items:center;gap:14px;margin-top:30px}
+.sig-root .sig-lang-head{font-family:"Space Grotesk";font-size:12px;letter-spacing:.3em;color:var(--dim)}
+.sig-root .sig-lang{font-size:14px;color:var(--mut)}
+.sig-root .sig-lang:not(:last-child)::after{content:"·";margin-left:14px;color:var(--dim)}
+
+/* şirket */
+.sig-root .act-company{padding:0 0 130px}
+.sig-root .sig-co{border:1px solid var(--gold-soft);background:var(--bg-2);padding:34px 30px;position:relative;overflow:hidden}
+.sig-root .sig-co::before{content:"";position:absolute;inset:0;background:radial-gradient(120% 100% at 0% 0%,var(--gold-soft),transparent 55%);pointer-events:none;opacity:.5}
+.sig-root .sig-co-head{display:flex;align-items:center;gap:18px;position:relative}
+.sig-root .sig-co-logo{width:62px;height:62px;border-radius:14px;object-fit:cover;border:1px solid var(--gold-soft);background:rgba(255,255,255,.05);flex-shrink:0}
+.sig-root .sig-co-name{font-size:24px;font-weight:600;letter-spacing:-.02em}
+.sig-root .sig-co-ind{font-family:"Space Grotesk";font-size:11px;letter-spacing:.22em;color:var(--gold);text-transform:uppercase;margin-top:5px}
+.sig-root .sig-co-desc{font-size:14px;color:var(--mut);line-height:1.75;margin-top:20px;position:relative;max-width:56ch}
+.sig-root .sig-co-contact{display:flex;flex-direction:column;gap:10px;margin-top:22px;position:relative}
+.sig-root .sig-co-contact a{display:inline-flex;align-items:center;gap:11px;font-size:13.5px;color:var(--ink);transition:color .35s}
+.sig-root .sig-co-contact a:hover{color:var(--gold)}
+.sig-root .sig-co-contact svg{width:15px;height:15px;color:var(--gold);flex-shrink:0}
+.sig-root .sig-co-links{display:flex;flex-wrap:wrap;gap:10px;margin-top:24px;position:relative}
+.sig-root .sig-co-pill{font-family:"Space Grotesk";font-size:12px;letter-spacing:.08em;padding:9px 18px;border:1px solid var(--sig-line,rgba(246,241,232,.14));border-radius:var(--sig-btn-r,999px);transition:all .4s var(--ease)}
+.sig-root .sig-co-pill:hover{border-color:var(--gold);color:var(--gold);transform:translateY(-3px)}
+.sig-root .sig-co-pill.solid{background:linear-gradient(180deg,var(--gold),var(--gold-2));color:var(--bg);border-color:transparent;font-weight:700}
+.sig-root .sig-co-pill.solid:hover{color:var(--bg);transform:translateY(-3px) scale(1.03);box-shadow:0 12px 30px -8px var(--gold-soft)}
+
+/* bana yaz formu */
+.sig-root .act-form{padding:30px 0 120px}
+.sig-root .sig-form{display:flex;flex-direction:column;gap:0}
+.sig-root .sf-row{display:grid;grid-template-columns:1fr 1fr;gap:0 34px}
+@media(max-width:560px){.sig-root .sf-row{grid-template-columns:1fr}}
+.sig-root .sig-form input,.sig-root .sig-form textarea{background:transparent;border:0;border-bottom:1px solid var(--sig-line,rgba(246,241,232,.16));color:var(--ink);font-size:15px;font-family:inherit;padding:16px 2px;outline:none;transition:border-color .4s;resize:none}
+.sig-root .sig-form input::placeholder,.sig-root .sig-form textarea::placeholder{color:var(--dim);letter-spacing:.04em}
+.sig-root .sig-form input:focus,.sig-root .sig-form textarea:focus{border-bottom-color:var(--gold)}
+.sig-root .sf-err{color:#f87171;font-size:13px;margin-top:14px}
+.sig-root .sf-send{align-self:flex-start;margin-top:30px;background:linear-gradient(180deg,var(--gold),var(--gold-2));color:var(--bg);border:0;font-family:"Space Grotesk";font-weight:700;font-size:13px;letter-spacing:.22em;padding:16px 34px;border-radius:var(--sig-btn-r,40px);transition:transform .4s var(--ease),box-shadow .4s}
+@media(pointer:fine){.sig-root .sf-send{cursor:none}}
+.sig-root .sf-send:hover{transform:translateY(-3px);box-shadow:0 14px 38px -10px var(--gold-soft)}
+.sig-root .sf-send:disabled{opacity:.6}
+.sig-root .sig-form-ok{text-align:center;padding:50px 0}
+.sig-root .sig-form-ok-mark{width:62px;height:62px;border-radius:50%;border:1px solid var(--gold);color:var(--gold);font-size:26px;display:flex;align-items:center;justify-content:center;margin:0 auto 20px}
+.sig-root .sig-form-ok-msg{font-family:"Space Grotesk";font-size:20px;font-weight:600}
+.sig-root .sig-form-ok-sub{font-size:13px;color:var(--mut);margin-top:8px}
+
+/* açık temalarda sabit koyu-varsayımlı çizgileri yumuşat */
+.sig-root.sig-light .work,.sig-root.sig-light .work:last-of-type{border-color:rgba(0,0,0,.1)}
+.sig-root.sig-light .q-dot{background:rgba(0,0,0,.12)}
+.sig-root.sig-light .q-dot.on{background:var(--gold)}
+.sig-root.sig-light .chan{border-color:rgba(0,0,0,.14);background:rgba(0,0,0,.02)}
+.sig-root.sig-light .endmark{border-top-color:rgba(0,0,0,.08)}
+.sig-root.sig-light .bn::after{color:rgba(0,0,0,.04)}
