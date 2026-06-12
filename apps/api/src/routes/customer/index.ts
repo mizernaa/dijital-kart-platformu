@@ -16,6 +16,18 @@ customerRouter.use(verifyToken)
 customerRouter.use(requireRole(['CUSTOMER']))
 customerRouter.use(attachUserPackage)
 
+// GET /customer/package — kullanıcının mevcut paketi + karşılaştırma için tüm paketler
+customerRouter.get('/package', async (req, res, next) => {
+  try {
+    const { prisma } = await import('@dkp/database')
+    const order = { FREE: 0, STARTER: 1, PRO: 2, ENTERPRISE: 3 } as Record<string, number>
+    const all = (await prisma.package.findMany()).sort((a, b) => (order[a.name] ?? 9) - (order[b.name] ?? 9))
+    res.json({ success: true, data: { current: req.userPackage ?? null, all } })
+  } catch (err) {
+    next(err)
+  }
+})
+
 customerRouter.use('/profile', profileRouter)
 customerRouter.use('/qr', qrRouter)
 customerRouter.use('/analytics', clampAnalyticsDays, analyticsRouter)

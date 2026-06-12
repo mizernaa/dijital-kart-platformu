@@ -167,7 +167,7 @@ export function SignatureView({ profile, slug, source }: { profile: SigProfile; 
 
     // Perde
     const veil = $('.sig-veil')
-    const vt = setTimeout(() => veil?.classList.add('open'), 1400)
+    const vt = setTimeout(() => veil?.classList.add('open'), 2000)
     cleanups.push(() => clearTimeout(vt))
 
     // İmleç
@@ -336,8 +336,13 @@ export function SignatureView({ profile, slug, source }: { profile: SigProfile; 
 
       <div className="sig-veil">
         <div className="v-inner">
-          <div className="v-num">N° 001 — SIGNATURE</div>
-          <div className="v-name">{(profile.displayName || '').toUpperCase()}</div>
+          <div className="v-name" aria-label={profile.displayName}>
+            {(profile.displayName || '').toUpperCase().split('').map((ch, i) => (
+              <span key={i} className="v-ch" style={{ animationDelay: `${0.12 + i * 0.055}s` }}>
+                {ch === ' ' ? ' ' : ch}
+              </span>
+            ))}
+          </div>
           <div className="v-bar" />
         </div>
       </div>

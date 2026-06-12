@@ -64,6 +64,7 @@ export function Sidebar() {
     { href: '/dashboard/leads', label: 'Mesajlar', icon: <MessageSquare size={18} />, badge: unreadLeads },
     { href: '/dashboard/nfc', label: 'NFC Sipariş', icon: <Wifi size={18} /> },
     { href: '/dashboard/custom-domain', label: 'Özel Domain', icon: <Globe size={18} /> },
+    { href: '/dashboard/package', label: 'Paketim', icon: <CreditCard size={18} /> },
     { href: '/dashboard/team', label: 'Ekip', icon: <Users size={18} /> },
   ]
 
