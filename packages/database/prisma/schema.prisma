@@ -143,6 +143,7 @@ model User {
   teamMemberOf      TeamMember[]     @relation("TeamMember")
   teamInvitations   TeamInvitation[] @relation("TeamInvitations")
   notifications     Notification[]
+  pushTokens        PushToken[]
   createdAt         DateTime      @default(now())
   updatedAt         DateTime      @updatedAt
 
@@ -367,6 +368,19 @@ model TeamInvitation {
 
   @@index([ownerId])
   @@index([token])
+}
+
+// Mobil uygulama push bildirim token'ları (Expo push)
+model PushToken {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  token     String   @unique
+  platform  String   @default("unknown") // ios | android
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
 }
 
 model Notification {

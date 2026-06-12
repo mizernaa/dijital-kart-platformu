@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useEffect, useState, useCallback } from 'react'
 import { api, setSessionExpiredHandler } from '../api/client'
+import { registerForPushNotifications } from '../api/push'
 import {
   saveSession,
   clearSession,
@@ -30,6 +31,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setLoading(false)
     })()
   }, [])
+
+  // Oturum açıkken push bildirim token'ını kaydet (izin istenir, hata sessiz geçilir).
+  useEffect(() => {
+    if (user) registerForPushNotifications()
+  }, [user])
 
   // 401 + refresh başarısız olursa otomatik çıkış.
   useEffect(() => {

@@ -7,6 +7,7 @@ import { prisma } from '@dkp/database'
 import { AppError } from '../../middleware/errorHandler'
 import { generateVCard } from '../../utils/vcard'
 import { sendEmail, escapeHtml } from '../../utils/email'
+import { sendPushToUser } from '../../utils/push'
 import { ProfileDetail } from '@dkp/types'
 
 export const publicRouter = Router()
@@ -228,7 +229,7 @@ publicRouter.post('/:slug/lead', leadLimiter, async (req, res, next) => {
 
     const profile = await prisma.profile.findUnique({
       where: { slug: req.params.slug },
-      include: { user: { select: { email: true } } },
+      include: { user: { select: { id: true, email: true } } },
     })
 
     if (!profile || !profile.isPublished) {
@@ -247,6 +248,14 @@ publicRouter.post('/:slug/lead', leadLimiter, async (req, res, next) => {
     prisma.analyticsEvent.create({
       data: { profileId: profile.id, eventType: 'CONTACT_FORM' },
     }).catch(() => {})
+
+    // Mobil push bildirimi (arka planda, akışı bloklamaz)
+    sendPushToUser(
+      profile.user.id,
+      'Yeni mesajın var! 📩',
+      `${body.data.name}: ${body.data.message.slice(0, 100)}`,
+      { type: 'lead', leadId: lead.id }
+    )
 
     sendEmail({
       to: profile.user.email,
