@@ -2,7 +2,7 @@
 import { useState } from 'react'
 import SectionHead from './SectionHead'
 
-const FAQS = [
+export const FAQS = [
   { q: 'NFC kart nasıl çalışıyor?', a: 'Kartını karşındakinin telefonuna yaklaştırman yeterli — dijital profilin anında ekranında açılır. Uygulama indirmek gerekmez; NFC desteklemeyen telefonlar için kartın üzerindeki QR kod da aynı işi görür.' },
   { q: 'Hangi telefonlarla uyumlu?', a: 'Son 5-6 yılın tüm iPhone (XS ve üzeri) ve Android telefonlarıyla uyumlu. QR kod sayesinde kameralı her telefonda çalışır.' },
   { q: 'Bilgilerimi sonradan değiştirebilir miyim?', a: 'Evet, sınırsız. Panelden bilgini, tasarımını, hatta İş Kartı ↔ Sosyal modunu istediğin an değiştirirsin — kartı yeniden bastırmana asla gerek kalmaz.' },

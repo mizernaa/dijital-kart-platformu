@@ -6,15 +6,36 @@ import './signature.css'
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_PUBLIC_SITE_URL || 'http://localhost:3002'),
-  title: { default: 'Q-Kart — Tek dokunuşla, tüm dünyan', template: '%s | Q-Kart' },
-  description: 'Q-Kart, NFC\'li akıllı dijital kimlik kartı. Kartvizitin, sosyal medyan, CV\'n ve ekibin tek dokunuşla karşındakinde.',
+  title: {
+    default: 'Q-Kart — NFC Dijital Kartvizit | Tek dokunuşla, tüm dünyan',
+    template: '%s | Q-Kart',
+  },
+  description: 'Q-Kart, NFC\'li akıllı dijital kartvizit. Kartvizitin, sosyal medyan, CV\'n ve ekibin tek dokunuşla karşındakinde. QR kodlu dijital kimlik kartını dakikalar içinde oluştur.',
+  keywords: [
+    'dijital kartvizit', 'NFC kartvizit', 'QR kartvizit', 'akıllı kartvizit',
+    'dijital kimlik kartı', 'NFC kart', 'sanal kartvizit', 'online kartvizit',
+    'temassız kartvizit', 'qansvizit', 'Q-Kart',
+  ],
+  alternates: { canonical: '/' },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: { index: true, follow: true, 'max-image-preview': 'large', 'max-snippet': -1 },
+  },
   openGraph: {
-    title: 'Q-Kart — Tek dokunuşla, tüm dünyan',
-    description: 'NFC\'li akıllı dijital kimlik kartı. Tek dokunuşla bağlan.',
+    title: 'Q-Kart — NFC Dijital Kartvizit | Tek dokunuşla, tüm dünyan',
+    description: 'NFC\'li akıllı dijital kartvizit. Tek dokunuşla bağlan, QR ile paylaş.',
     type: 'website',
+    url: '/',
     siteName: 'Q-Kart',
     locale: 'tr_TR',
     images: '/assets/og-image.jpg',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Q-Kart — NFC Dijital Kartvizit',
+    description: 'NFC\'li akıllı dijital kartvizit. Tek dokunuşla bağlan, QR ile paylaş.',
+    images: ['/assets/og-image.jpg'],
   },
 }
 

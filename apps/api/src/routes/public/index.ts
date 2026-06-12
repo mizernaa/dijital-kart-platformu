@@ -106,6 +106,21 @@ publicRouter.get('/domain/:domain', async (req, res, next) => {
   }
 })
 
+// GET /p/sitemap/slugs — yayındaki profillerin slug listesi (sitemap.xml için)
+publicRouter.get('/sitemap/slugs', async (_req, res, next) => {
+  try {
+    const profiles = await prisma.profile.findMany({
+      where: { isPublished: true },
+      select: { slug: true, updatedAt: true },
+      orderBy: { updatedAt: 'desc' },
+      take: 5000,
+    })
+    res.json({ success: true, data: profiles })
+  } catch (err) {
+    next(err)
+  }
+})
+
 // GET /p/:slug — public profil verisi
 publicRouter.get('/:slug', async (req, res, next) => {
   try {
